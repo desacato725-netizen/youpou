@@ -1,0 +1,58 @@
+name: Experimento dylib na Inter de teste
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'test-input/Inter-test.ipa'
+      - 'inter-overlay/Overlay.m'
+      - '.github/workflows/inter-dylib-experiment.yml'
+
+jobs:
+  inject-test:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Instalar ferramenta insert_dylib
+        run: |
+          git clone --depth 1 https://github.com/tyilo/insert_dylib.git /tmp/insert_dylib
+          cd /tmp/insert_dylib
+          xcodebuild -project insert_dylib.xcodeproj -scheme insert_dylib -configuration Release -sdk macosx SYMROOT=/tmp/insert-build CODE_SIGNING_ALLOWED=NO
+          cp /tmp/insert-build/Release/insert_dylib /usr/local/bin/insert_dylib
+          chmod +x /usr/local/bin/insert_dylib
+
+      - name: Compilar dylib iOS
+        run: |
+          xcrun --sdk iphoneos clang -dynamiclib -fobjc-arc -framework UIKit -framework Foundation \
+            -miphoneos-version-min=16.0 inter-overlay/Overlay.m \
+            -o /tmp/Overlay.dylib
+
+      - name: Preparar cópia da IPA de teste
+        run: |
+          rm -rf /tmp/inter-test
+          mkdir -p /tmp/inter-test
+          unzip -q test-input/Inter-test.ipa -d /tmp/inter-test
+          cp /tmp/Overlay.dylib /tmp/inter-test/Payload/3105.app/Overlay.dylib
+
+      - name: Inserir dylib no executável arm64
+        run: |
+          insert_dylib --inplace --strip-codesig --all-yes \
+            '@executable_path/Overlay.dylib' \
+            /tmp/inter-test/Payload/3105.app/3105
+
+      - name: Reassinar bundle experimental
+        run: |
+          codesign --force --deep --sign - /tmp/inter-test/Payload/3105.app
+          mkdir -p out/Payload
+          cp -R /tmp/inter-test/Payload/3105.app out/Payload/
+          cd out && zip -qry ../Inter-dylib-experimental.ipa Payload
+
+      - name: Enviar IPA experimental
+        uses: actions/upload-artifact@v4
+        with:
+          name: inter-dylib-experimental
+          path: Inter-dylib-experimental.ipa
+          if-no-files-found: error
