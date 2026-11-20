@@ -61,13 +61,10 @@ jobs:
           rm -rf Payload dist
           mkdir -p Payload dist
           cp -R "$APP_PATH" Payload/
-          set +e
-          (cd Payload && /usr/bin/zip -r ../dist/musicmenu-unsigned.ipa .)
-          ZIP_STATUS=$?
-          set -e
+          (cd Payload && /usr/bin/ditto -c -k --sequesterRsrc . ../dist/musicmenu-unsigned.ipa)
           test -s dist/musicmenu-unsigned.ipa
           /usr/bin/unzip -tq dist/musicmenu-unsigned.ipa
-          echo "zip exit status: $ZIP_STATUS; IPA archive validated"
+          echo "IPA archive validated"
 
       - name: Enviar IPA e fonte para artefatos
         uses: actions/upload-artifact@v4
