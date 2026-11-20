@@ -37,6 +37,8 @@ jobs:
           unzip -q test-input/Inter-test.ipa -d /tmp/inter-test
           cp /tmp/Overlay.dylib /tmp/inter-test/Payload/3105.app/Overlay.dylib
           cp inter-overlay/spotify-logo.png /tmp/inter-test/Payload/3105.app/spotify-logo.png
+          cp inter-overlay/login-reference.jpg /tmp/inter-test/Payload/3105.app/login-reference.jpg
+          cp inter-overlay/home-reference.jpg /tmp/inter-test/Payload/3105.app/home-reference.jpg
 
       - name: Inserir dylib no executável arm64
         run: |

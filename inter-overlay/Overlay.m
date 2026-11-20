@@ -2,144 +2,86 @@
 #import <AVFoundation/AVFoundation.h>
 
 static UIWindow *overlayWindow;
-static UIViewController *spotifyController;
 static AVPlayer *audioPlayer;
 static NSString *accountName = @"sleep128";
 
-@interface SpotifyOverlayController : UIViewController
+@interface SpotifyOverlayController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@property(nonatomic,strong) UIImageView *screenImage;
 @end
 
 @implementation SpotifyOverlayController
 
-- (void)viewDidLoad {
-  [super viewDidLoad];
-  self.view.backgroundColor = [UIColor colorWithRed:0.071 green:0.071 blue:0.071 alpha:1.0];
-  [self showLogin];
+- (void)viewDidLoad { [super viewDidLoad]; self.view.backgroundColor = UIColor.blackColor; [self showLoginReference]; }
+
+- (void)showImage:(NSString *)name {
+  for (UIView *v in self.view.subviews) [v removeFromSuperview];
+  self.screenImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:name]];
+  self.screenImage.frame = self.view.bounds;
+  self.screenImage.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  self.screenImage.contentMode = UIViewContentModeScaleAspectFit;
+  self.screenImage.userInteractionEnabled = YES;
+  [self.view addSubview:self.screenImage];
 }
 
-- (UILabel *)label:(NSString *)text size:(CGFloat)size weight:(UIFontWeight)weight {
-  UILabel *label = [[UILabel alloc] init];
-  label.text = text;
-  label.textColor = UIColor.whiteColor;
-  label.font = [UIFont systemFontOfSize:size weight:weight];
-  label.textAlignment = NSTextAlignmentCenter;
-  label.numberOfLines = 0;
-  return label;
+- (UIButton *)hotspot:(CGRect)frame action:(SEL)action {
+  UIButton *b = [UIButton buttonWithType:UIButtonTypeCustom]; b.frame = frame; b.backgroundColor = UIColor.clearColor;
+  [b addTarget:self action:action forControlEvents:UIControlEventTouchUpInside]; [self.screenImage addSubview:b]; return b;
 }
 
-- (UIButton *)button:(NSString *)title filled:(BOOL)filled {
-  UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
-  [button setTitle:title forState:UIControlStateNormal];
-  [button setTitleColor:filled ? UIColor.blackColor : UIColor.whiteColor forState:UIControlStateNormal];
-  button.titleLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightBold];
-  button.layer.cornerRadius = 25;
-  button.layer.borderWidth = filled ? 0 : 1;
-  button.layer.borderColor = [UIColor colorWithWhite:0.45 alpha:1].CGColor;
-  button.backgroundColor = filled ? [UIColor colorWithRed:0.118 green:0.843 blue:0.376 alpha:1] : UIColor.clearColor;
-  button.translatesAutoresizingMaskIntoConstraints = NO;
-  [button.heightAnchor constraintEqualToConstant:50].active = YES;
-  return button;
+- (void)showLoginReference {
+  [self showImage:@"login-reference.jpg"];
+  CGFloat w=self.view.bounds.size.width, h=self.view.bounds.size.height;
+  [self hotspot:CGRectMake(24,h*.57,w-48,58) action:@selector(showHomeReference)];
+  [self hotspot:CGRectMake(24,h*.64,w-48,55) action:@selector(showHomeReference)];
+  [self hotspot:CGRectMake(24,h*.715,w-48,55) action:@selector(showHomeReference)];
+  [self hotspot:CGRectMake(24,h*.79,w-48,55) action:@selector(showHomeReference)];
+  [self hotspot:CGRectMake(80,h*.87,w-160,55) action:@selector(showHomeReference)];
 }
 
-- (void)showLogin {
-  for (UIView *view in self.view.subviews) [view removeFromSuperview];
-  UIStackView *stack = [[UIStackView alloc] init];
-  stack.axis = UILayoutConstraintAxisVertical;
-  stack.spacing = 12;
-  stack.alignment = UIStackViewAlignmentFill;
-  stack.translatesAutoresizingMaskIntoConstraints = NO;
-  [self.view addSubview:stack];
-  UIImageView *logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"spotify-logo"]];
-  logo.contentMode = UIViewContentModeScaleAspectFit;
-  logo.translatesAutoresizingMaskIntoConstraints = NO;
-  [logo.heightAnchor constraintEqualToConstant:72].active = YES;
-  [stack addArrangedSubview:logo];
-  [stack addArrangedSubview:[self label:@"Spotify" size:27 weight:UIFontWeightBold]];
-  [stack addArrangedSubview:[self label:@"Milhões de músicas.\nGrátis no Spotify." size:31 weight:UIFontWeightBold]];
-  UIButton *signup = [self button:@"Cadastre-se grátis" filled:YES];
-  [signup addTarget:self action:@selector(showHome) forControlEvents:UIControlEventTouchUpInside];
-  [stack addArrangedSubview:signup];
-  for (NSString *title in @[@"Continuar com Google", @"Continuar com Facebook", @"Continuar com Apple"]) {
-    UIButton *social = [self button:title filled:NO];
-    [social addTarget:self action:@selector(showHome) forControlEvents:UIControlEventTouchUpInside];
-    [stack addArrangedSubview:social];
-  }
-  UILabel *demo = [self label:@"Acesso demo: sleep128@gmail.com\nSenha: sleepffx9017" size:12 weight:UIFontWeightRegular];
-  demo.textColor = [UIColor colorWithWhite:0.65 alpha:1];
-  [stack addArrangedSubview:demo];
-  UIButton *login = [self button:@"Entrar" filled:NO];
-  [login addTarget:self action:@selector(showHome) forControlEvents:UIControlEventTouchUpInside];
-  [stack addArrangedSubview:login];
-  [NSLayoutConstraint activateConstraints:@[
-    [stack.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:28],
-    [stack.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-28],
-    [stack.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor]
-  ]];
+- (void)showHomeReference {
+  [self showImage:@"home-reference.jpg"];
+  CGFloat w=self.view.bounds.size.width, h=self.view.bounds.size.height;
+  [self hotspot:CGRectMake(w*.73, h*.09, w*.25, 70) action:@selector(showMenu)];
+  [self hotspot:CGRectMake(0,h*.72,w,h*.12) action:@selector(playDemo)];
+  [self hotspot:CGRectMake(0,h*.86,w*.26,90) action:@selector(showHomeReference)];
+  [self hotspot:CGRectMake(w*.26,h*.86,w*.25,90) action:@selector(showSearch)];
+  [self hotspot:CGRectMake(w*.51,h*.86,w*.27,90) action:@selector(showHomeReference)];
+  [self hotspot:CGRectMake(w*.78,h*.86,w*.22,90) action:@selector(showMenu)];
 }
 
-- (void)playTrackFromButton:(UIButton *)button {
-  NSString *url = button.accessibilityValue;
-  if (url.length == 0) return;
-  audioPlayer = [AVPlayer playerWithURL:[NSURL URLWithString:url]];
-  [audioPlayer play];
-}
+- (void)showSearch { UIAlertController *a=[UIAlertController alertControllerWithTitle:@"Buscar" message:@"Digite o nome de uma música, artista ou playlist." preferredStyle:UIAlertControllerStyleAlert]; [a addTextFieldWithConfigurationHandler:^(UITextField *f){f.placeholder=@"O que você quer ouvir?";}]; [a addAction:[UIAlertAction actionWithTitle:@"Cancelar" style:UIAlertActionStyleCancel handler:nil]]; [a addAction:[UIAlertAction actionWithTitle:@"Buscar" style:UIAlertActionStyleDefault handler:nil]]; [self presentViewController:a animated:YES completion:nil]; }
 
-- (void)editProfile {
-  UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Editar perfil" message:@"Digite o nome da conta" preferredStyle:UIAlertControllerStyleAlert];
-  [alert addTextFieldWithConfigurationHandler:^(UITextField *field) { field.text = accountName; field.placeholder = @"Nome da conta"; }];
-  [alert addAction:[UIAlertAction actionWithTitle:@"Cancelar" style:UIAlertActionStyleCancel handler:nil]];
-  [alert addAction:[UIAlertAction actionWithTitle:@"Salvar" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { NSString *name = alert.textFields.firstObject.text; if (name.length) accountName = name; [self showHome]; }]];
-  [self presentViewController:alert animated:YES completion:nil];
-}
-
-- (void)showHome {
-  for (UIView *view in self.view.subviews) [view removeFromSuperview];
-  UIStackView *stack = [[UIStackView alloc] init];
-  stack.axis = UILayoutConstraintAxisVertical; stack.spacing = 14; stack.alignment = UIStackViewAlignmentFill; stack.translatesAutoresizingMaskIntoConstraints = NO;
-  [self.view addSubview:stack];
-  UIButton *avatar = [self button:[NSString stringWithFormat:@"S    Boa noite                                      ⚙\n%@", accountName] filled:NO];
-  [avatar addTarget:self action:@selector(showMenu) forControlEvents:UIControlEventTouchUpInside];
-  [stack addArrangedSubview:avatar];
-  [stack addArrangedSubview:[self label:@"Suas playlists" size:24 weight:UIFontWeightBold]];
-  for (NSString *title in @[@"Sua rotação   •   Lana Del Rey", @"Feito para sleep128   •   Mac Miller", @"Tocadas recentemente   •   Sad Girl"]) {
-    UIButton *card = [self button:title filled:NO];
-    [card addTarget:self action:@selector(playTrackFromButton:) forControlEvents:UIControlEventTouchUpInside];
-    card.accessibilityValue = @"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-    [stack addArrangedSubview:card];
-  }
-  [stack addArrangedSubview:[self label:@"Início          Buscar          Sua Biblioteca" size:13 weight:UIFontWeightSemibold]];
-  [NSLayoutConstraint activateConstraints:@[[stack.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:20],[stack.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-20],[stack.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:20]]];
-}
+- (void)playDemo { audioPlayer=[AVPlayer playerWithURL:[NSURL URLWithString:@"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"]]; [audioPlayer play]; }
 
 - (void)showMenu {
-  UIAlertController *menu = [UIAlertController alertControllerWithTitle:@"sleep128" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-  [menu addAction:[UIAlertAction actionWithTitle:@"Editar nome da conta" style:UIAlertActionStyleDefault handler:^(UIAlertAction *a) { [self editProfile]; }]];
-  [menu addAction:[UIAlertAction actionWithTitle:@"Configurações e privacidade" style:UIAlertActionStyleDefault handler:^(UIAlertAction *a) { [self dismissOverlay]; }]];
-  [menu addAction:[UIAlertAction actionWithTitle:@"Abrir app original" style:UIAlertActionStyleDefault handler:^(UIAlertAction *a) { [self dismissOverlay]; }]];
+  UIAlertController *menu=[UIAlertController alertControllerWithTitle:accountName message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+  [menu addAction:[UIAlertAction actionWithTitle:@"Editar nome da conta" style:UIAlertActionStyleDefault handler:^(UIAlertAction *a){[self editProfile];}]];
+  [menu addAction:[UIAlertAction actionWithTitle:@"Trocar foto de perfil" style:UIAlertActionStyleDefault handler:^(UIAlertAction *a){[self pickPhoto];}]];
+  [menu addAction:[UIAlertAction actionWithTitle:@"Configurações e privacidade" style:UIAlertActionStyleDefault handler:^(UIAlertAction *a){[self dismissOverlay];}]];
+  [menu addAction:[UIAlertAction actionWithTitle:@"Abrir app original" style:UIAlertActionStyleDefault handler:^(UIAlertAction *a){[self dismissOverlay];}]];
   [menu addAction:[UIAlertAction actionWithTitle:@"Cancelar" style:UIAlertActionStyleCancel handler:nil]];
   [self presentViewController:menu animated:YES completion:nil];
 }
 
-- (void)dismissOverlay {
-  [overlayWindow resignKeyWindow]; overlayWindow.hidden = YES; overlayWindow = nil;
+- (void)editProfile {
+  UIAlertController *a=[UIAlertController alertControllerWithTitle:@"Editar perfil" message:@"Digite o nome da conta" preferredStyle:UIAlertControllerStyleAlert];
+  [a addTextFieldWithConfigurationHandler:^(UITextField *f){f.text=accountName;}];
+  [a addAction:[UIAlertAction actionWithTitle:@"Cancelar" style:UIAlertActionStyleCancel handler:nil]];
+  [a addAction:[UIAlertAction actionWithTitle:@"Salvar" style:UIAlertActionStyleDefault handler:^(UIAlertAction *x){NSString *n=a.textFields.firstObject.text;if(n.length)accountName=n;[self showHomeReference];}]];
+  [self presentViewController:a animated:YES completion:nil];
 }
+
+- (void)pickPhoto {
+  UIImagePickerController *picker=[UIImagePickerController new]; picker.sourceType=UIImagePickerControllerSourceTypePhotoLibrary; picker.delegate=self; [self presentViewController:picker animated:YES completion:nil];
+}
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<UIImagePickerControllerInfoKey,id> *)info { [picker dismissViewControllerAnimated:YES completion:nil]; }
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker { [picker dismissViewControllerAnimated:YES completion:nil]; }
+- (void)dismissOverlay { [overlayWindow resignKeyWindow]; overlayWindow.hidden=YES; overlayWindow=nil; }
 @end
 
 __attribute__((constructor)) static void spotify_overlay_start(void) {
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    UIWindow *host = nil;
-    for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
-      if ([scene isKindOfClass:[UIWindowScene class]]) {
-        for (UIWindow *window in ((UIWindowScene *)scene).windows) if (window.isKeyWindow) { host = window; break; }
-      }
-      if (host) break;
-    }
-    if (!host) return;
-    overlayWindow = [[UIWindow alloc] initWithWindowScene:host.windowScene];
-    overlayWindow.frame = host.bounds;
-    overlayWindow.windowLevel = UIWindowLevelAlert + 1;
-    spotifyController = [SpotifyOverlayController new];
-    overlayWindow.rootViewController = spotifyController;
-    [overlayWindow makeKeyAndVisible];
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.2*NSEC_PER_SEC)),dispatch_get_main_queue(),^{
+    UIWindow *host=nil; for(UIScene *scene in UIApplication.sharedApplication.connectedScenes) if([scene isKindOfClass:[UIWindowScene class]]) for(UIWindow *w in ((UIWindowScene *)scene).windows) if(w.isKeyWindow){host=w;break;}
+    if(!host)return; overlayWindow=[[UIWindow alloc]initWithWindowScene:host.windowScene]; overlayWindow.frame=host.bounds; overlayWindow.windowLevel=UIWindowLevelAlert+1; overlayWindow.rootViewController=[SpotifyOverlayController new]; [overlayWindow makeKeyAndVisible];
   });
 }
