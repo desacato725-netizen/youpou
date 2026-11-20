@@ -54,21 +54,8 @@ jobs:
             ONLY_ACTIVE_ARCH=NO \
             build
 
-      - name: Empacotar IPA não assinada
-        run: |
-          APP_PATH=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name '*.app' -print -quit)
-          test -n "$APP_PATH"
-          rm -rf Payload dist
-          mkdir -p Payload dist
-          cp -R "$APP_PATH" Payload/
-          (cd Payload && /usr/bin/ditto -c -k --sequesterRsrc . ../dist/musicmenu-unsigned.ipa)
-          test -s dist/musicmenu-unsigned.ipa
-          /usr/bin/unzip -tq dist/musicmenu-unsigned.ipa
-          echo "IPA archive validated"
-
-      - name: Enviar IPA e fonte para artefatos
+      - name: Enviar app compilado para empacotamento Linux
         uses: actions/upload-artifact@v4
         with:
-          name: musicmenu-ios-gbox
-          path: |
-            dist/musicmenu-unsigned.ipa
+          name: musicmenu-ios-app
+          path: build/Build/Products/Release-iphoneos/*.app
