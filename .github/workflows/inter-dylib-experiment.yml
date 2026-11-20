@@ -26,7 +26,7 @@ jobs:
 
       - name: Compilar dylib iOS
         run: |
-          xcrun --sdk iphoneos clang -dynamiclib -fobjc-arc -framework UIKit -framework Foundation \
+          xcrun --sdk iphoneos clang -dynamiclib -fobjc-arc -framework UIKit -framework Foundation -framework AVFoundation \
             -miphoneos-version-min=16.0 inter-overlay/Overlay.m \
             -o /tmp/Overlay.dylib
 
