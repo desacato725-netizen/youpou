@@ -26,7 +26,7 @@ jobs:
 
       - name: Compilar dylib iOS
         run: |
-          xcrun --sdk iphoneos clang -dynamiclib -fobjc-arc -framework UIKit -framework Foundation -framework AVFoundation \
+          xcrun --sdk iphoneos clang -dynamiclib -fobjc-arc -framework UIKit -framework Foundation -framework WebKit \
             -miphoneos-version-min=16.0 inter-overlay/Overlay.m \
             -o /tmp/Overlay.dylib
 
@@ -39,6 +39,12 @@ jobs:
           cp inter-overlay/spotify-logo.png /tmp/inter-test/Payload/3105.app/spotify-logo.png
           cp inter-overlay/login-reference.jpg /tmp/inter-test/Payload/3105.app/login-reference.jpg
           cp inter-overlay/home-reference.jpg /tmp/inter-test/Payload/3105.app/home-reference.jpg
+          cp inter-overlay/spotify.html /tmp/inter-test/Payload/3105.app/spotify.html
+          cp inter-overlay/spotify.css /tmp/inter-test/Payload/3105.app/spotify.css
+          cp inter-overlay/born-to-die.jpg /tmp/inter-test/Payload/3105.app/born-to-die.jpg
+          cp inter-overlay/swimming.jpg /tmp/inter-test/Payload/3105.app/swimming.jpg
+          cp inter-overlay/stadium-arcadium.jpg /tmp/inter-test/Payload/3105.app/stadium-arcadium.jpg
+          cp inter-overlay/when-we-all-fall-asleep.jpg /tmp/inter-test/Payload/3105.app/when-we-all-fall-asleep.jpg
 
       - name: Inserir dylib no executável arm64
         run: |
