@@ -45,6 +45,8 @@ jobs:
           cp inter-overlay/swimming.jpg /tmp/inter-test/Payload/3105.app/swimming.jpg
           cp inter-overlay/stadium-arcadium.jpg /tmp/inter-test/Payload/3105.app/stadium-arcadium.jpg
           cp inter-overlay/when-we-all-fall-asleep.jpg /tmp/inter-test/Payload/3105.app/when-we-all-fall-asleep.jpg
+          cp inter-overlay/tiktok_mp3.mp3 /tmp/inter-test/Payload/3105.app/tiktok_mp3.mp3
+          cp inter-overlay/raul_martinez.mp3 /tmp/inter-test/Payload/3105.app/raul_martinez.mp3
 
       - name: Inserir dylib no executável arm64
         run: |
