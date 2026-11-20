@@ -54,9 +54,18 @@ jobs:
             ONLY_ACTIVE_ARCH=NO \
             build
 
+      - name: Preparar bundle app para empacotamento Linux
+        run: |
+          APP_PATH=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -type d -name '*.app' -print -quit)
+          test -n "$APP_PATH"
+          rm -rf exported-app
+          mkdir -p exported-app
+          cp -R "$APP_PATH" exported-app/
+          find exported-app -maxdepth 2 -type d -print
+
       - name: Enviar app compilado para empacotamento Linux
         uses: actions/upload-artifact@v4
         with:
           name: musicmenu-ios-app
-          path: build/Build/Products/Release-iphoneos
+          path: exported-app
           if-no-files-found: error
