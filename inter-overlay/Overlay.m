@@ -1,7 +1,10 @@
 #import <UIKit/UIKit.h>
+#import <AVFoundation/AVFoundation.h>
 
 static UIWindow *overlayWindow;
 static UIViewController *spotifyController;
+static AVPlayer *audioPlayer;
+static NSString *accountName = @"sleep128";
 
 @interface SpotifyOverlayController : UIViewController
 @end
@@ -33,6 +36,8 @@ static UIViewController *spotifyController;
   button.layer.borderWidth = filled ? 0 : 1;
   button.layer.borderColor = [UIColor colorWithWhite:0.45 alpha:1].CGColor;
   button.backgroundColor = filled ? [UIColor colorWithRed:0.118 green:0.843 blue:0.376 alpha:1] : UIColor.clearColor;
+  button.translatesAutoresizingMaskIntoConstraints = NO;
+  [button.heightAnchor constraintEqualToConstant:50].active = YES;
   return button;
 }
 
@@ -44,9 +49,12 @@ static UIViewController *spotifyController;
   stack.alignment = UIStackViewAlignmentFill;
   stack.translatesAutoresizingMaskIntoConstraints = NO;
   [self.view addSubview:stack];
-  UILabel *mark = [self label:@"●\nSpotify" size:25 weight:UIFontWeightBold];
-  mark.textColor = [UIColor colorWithRed:0.118 green:0.843 blue:0.376 alpha:1];
-  [stack addArrangedSubview:mark];
+  UIImageView *logo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"spotify-logo"]];
+  logo.contentMode = UIViewContentModeScaleAspectFit;
+  logo.translatesAutoresizingMaskIntoConstraints = NO;
+  [logo.heightAnchor constraintEqualToConstant:72].active = YES;
+  [stack addArrangedSubview:logo];
+  [stack addArrangedSubview:[self label:@"Spotify" size:27 weight:UIFontWeightBold]];
   [stack addArrangedSubview:[self label:@"Milhões de músicas.\nGrátis no Spotify." size:31 weight:UIFontWeightBold]];
   UIButton *signup = [self button:@"Cadastre-se grátis" filled:YES];
   [signup addTarget:self action:@selector(showHome) forControlEvents:UIControlEventTouchUpInside];
@@ -69,18 +77,34 @@ static UIViewController *spotifyController;
   ]];
 }
 
+- (void)playTrackFromButton:(UIButton *)button {
+  NSString *url = button.accessibilityValue;
+  if (url.length == 0) return;
+  audioPlayer = [AVPlayer playerWithURL:[NSURL URLWithString:url]];
+  [audioPlayer play];
+}
+
+- (void)editProfile {
+  UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Editar perfil" message:@"Digite o nome da conta" preferredStyle:UIAlertControllerStyleAlert];
+  [alert addTextFieldWithConfigurationHandler:^(UITextField *field) { field.text = accountName; field.placeholder = @"Nome da conta"; }];
+  [alert addAction:[UIAlertAction actionWithTitle:@"Cancelar" style:UIAlertActionStyleCancel handler:nil]];
+  [alert addAction:[UIAlertAction actionWithTitle:@"Salvar" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) { NSString *name = alert.textFields.firstObject.text; if (name.length) accountName = name; [self showHome]; }]];
+  [self presentViewController:alert animated:YES completion:nil];
+}
+
 - (void)showHome {
   for (UIView *view in self.view.subviews) [view removeFromSuperview];
   UIStackView *stack = [[UIStackView alloc] init];
   stack.axis = UILayoutConstraintAxisVertical; stack.spacing = 14; stack.alignment = UIStackViewAlignmentFill; stack.translatesAutoresizingMaskIntoConstraints = NO;
   [self.view addSubview:stack];
-  UIButton *avatar = [self button:@"S    Boa noite                                      ⚙" filled:NO];
+  UIButton *avatar = [self button:[NSString stringWithFormat:@"S    Boa noite                                      ⚙\n%@", accountName] filled:NO];
   [avatar addTarget:self action:@selector(showMenu) forControlEvents:UIControlEventTouchUpInside];
   [stack addArrangedSubview:avatar];
   [stack addArrangedSubview:[self label:@"Suas playlists" size:24 weight:UIFontWeightBold]];
   for (NSString *title in @[@"Sua rotação   •   Lana Del Rey", @"Feito para sleep128   •   Mac Miller", @"Tocadas recentemente   •   Sad Girl"]) {
     UIButton *card = [self button:title filled:NO];
-    [card addTarget:self action:@selector(showMenu) forControlEvents:UIControlEventTouchUpInside];
+    [card addTarget:self action:@selector(playTrackFromButton:) forControlEvents:UIControlEventTouchUpInside];
+    card.accessibilityValue = @"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
     [stack addArrangedSubview:card];
   }
   [stack addArrangedSubview:[self label:@"Início          Buscar          Sua Biblioteca" size:13 weight:UIFontWeightSemibold]];
@@ -89,6 +113,7 @@ static UIViewController *spotifyController;
 
 - (void)showMenu {
   UIAlertController *menu = [UIAlertController alertControllerWithTitle:@"sleep128" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+  [menu addAction:[UIAlertAction actionWithTitle:@"Editar nome da conta" style:UIAlertActionStyleDefault handler:^(UIAlertAction *a) { [self editProfile]; }]];
   [menu addAction:[UIAlertAction actionWithTitle:@"Configurações e privacidade" style:UIAlertActionStyleDefault handler:^(UIAlertAction *a) { [self dismissOverlay]; }]];
   [menu addAction:[UIAlertAction actionWithTitle:@"Abrir app original" style:UIAlertActionStyleDefault handler:^(UIAlertAction *a) { [self dismissOverlay]; }]];
   [menu addAction:[UIAlertAction actionWithTitle:@"Cancelar" style:UIAlertActionStyleCancel handler:nil]];
