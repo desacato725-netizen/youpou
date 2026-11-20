@@ -58,4 +58,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: musicmenu-ios-app
-          path: build/Build/Products/Release-iphoneos/*.app
+          path: build/Build/Products/Release-iphoneos
+          if-no-files-found: error
