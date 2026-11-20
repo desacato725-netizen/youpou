@@ -9,7 +9,6 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
@@ -19,42 +18,32 @@ const DEMO_EMAIL = "sleep128@gmail.com";
 const DEMO_PASSWORD = "sleepffx9017";
 const ORIGINAL_APP_URL = "threeoneosfive://";
 
-const tracks = [
-  {
-    id: "lana",
-    title: "Faixa da Lana Del Rey",
-    artist: "Lana Del Rey",
-    cover: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800&q=80",
-    uri: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    color: "#5c3c65",
-  },
-  {
-    id: "kevin",
-    title: "Faixa do MC Kevin",
-    artist: "MC Kevin",
-    cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
-    uri: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    color: "#8f4639",
-  },
-  {
-    id: "kanye",
-    title: "Faixa do Kanye West",
-    artist: "Kanye West",
-    cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
-    uri: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-    color: "#334f65",
-  },
+const albums = [
+  { title: "Born To Die", subtitle: "Lana Del Rey", image: require("../../assets/spotify/images/albums/born-to-die.jpg") },
+  { title: "When We All Fall Asleep", subtitle: "Billie Eilish", image: require("../../assets/spotify/images/albums/when-we-all-fall-asleep.jpg") },
+  { title: "Swimming", subtitle: "Mac Miller", image: require("../../assets/spotify/images/albums/swimming.jpg") },
+  { title: "The Legend of Mr. Rager", subtitle: "Kid Cudi", image: require("../../assets/spotify/images/albums/the-legend-of-mr-rager.jpg") },
+  { title: "Stadium Arcadium", subtitle: "Red Hot Chili Peppers", image: require("../../assets/spotify/images/albums/stadium-arcadium.jpg") },
+  { title: "Wish You Were Here", subtitle: "Pink Floyd", image: require("../../assets/spotify/images/albums/wish-you-where-here.jpg") },
 ];
 
-function Brand({ compact = false }: { compact?: boolean }) {
-  return (
-    <View style={styles.brandRow}>
-      <View style={styles.brandMark}>
-        <Ionicons name="musical-notes" size={compact ? 18 : 22} color="#111" />
-      </View>
-      {!compact && <Text style={styles.brandText}>musicmenu</Text>}
-    </View>
-  );
+const tracks = [
+  { id: "sad-girl", title: "Sad Girl", artist: "Lana Del Rey", album: "Ultraviolence", image: require("../../assets/spotify/images/albums/born-to-die.jpg"), uri: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+  { id: "summertime", title: "Summertime Sadness", artist: "Lana Del Rey", album: "Born To Die", image: require("../../assets/spotify/images/albums/born-to-die.jpg"), uri: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+  { id: "self-care", title: "Self Care", artist: "Mac Miller", album: "Swimming", image: require("../../assets/spotify/images/albums/swimming.jpg"), uri: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+];
+
+const browse = [
+  ["Made For You", "#8c67ac"], ["New Releases", "#e13300"], ["Hip-Hop", "#ba5d07"],
+  ["Pop", "#27856a"], ["Mood", "#517a50"], ["Charts", "#8d67ab"],
+];
+
+function Logo() {
+  return <View style={styles.logoRow}><View style={styles.logoCircle}><Ionicons name="musical-notes" size={24} color="#000" /></View><Text style={styles.logoText}>Spotify</Text></View>;
+}
+
+function AlbumRow({ title, data, onPress }: { title: string; data: typeof albums; onPress: (item: typeof albums[number]) => void }) {
+  return <View style={styles.section}><View style={styles.sectionHeader}><Text style={styles.sectionTitle}>{title}</Text><Text style={styles.showAll}>Ver tudo</Text></View><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontal}>{data.map((item) => <Pressable key={item.title} style={styles.albumCard} onPress={() => onPress(item)}><Image source={item.image} style={styles.albumImage} /><Text numberOfLines={1} style={styles.albumTitle}>{item.title}</Text><Text numberOfLines={1} style={styles.albumSubtitle}>{item.subtitle}</Text></Pressable>)}</ScrollView></View>;
 }
 
 export default function HomeScreen() {
@@ -62,17 +51,14 @@ export default function HomeScreen() {
   const [email, setEmail] = useState(DEMO_EMAIL);
   const [password, setPassword] = useState(DEMO_PASSWORD);
   const [loginError, setLoginError] = useState("");
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [screen, setScreen] = useState<"home" | "settings">("home");
+  const [tab, setTab] = useState("home");
+  const [drawer, setDrawer] = useState(false);
+  const [settings, setSettings] = useState(false);
+  const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(tracks[0].id);
-  const [showPassword, setShowPassword] = useState(false);
-  const [privateAccount, setPrivateAccount] = useState(false);
-  const selected = useMemo(
-    () => tracks.find((track) => track.id === selectedId) ?? tracks[0],
-    [selectedId],
-  );
-  const player = useAudioPlayer(selected.uri, { updateInterval: 250 });
+  const player = useAudioPlayer(tracks[0].uri);
   const status = useAudioPlayerStatus(player);
+  const selected = useMemo(() => tracks.find((track) => track.id === selectedId) ?? tracks[0], [selectedId]);
 
   const openTrack = (id: string) => {
     const track = tracks.find((item) => item.id === id) ?? tracks[0];
@@ -81,245 +67,25 @@ export default function HomeScreen() {
     player.play();
   };
 
-  const nextTrack = () => {
-    const index = tracks.findIndex((track) => track.id === selectedId);
-    openTrack(tracks[(index + 1) % tracks.length].id);
-  };
-
-  const login = () => {
-    if (email.trim() === DEMO_EMAIL && password === DEMO_PASSWORD) {
-      setLoginError("");
-      setLoggedIn(true);
-      return;
-    }
-    setLoginError("E-mail ou senha de demonstração incorretos.");
+  const openOriginal = () => {
+    setDrawer(false);
+    Linking.openURL(ORIGINAL_APP_URL).catch(() => undefined);
   };
 
   if (!loggedIn) {
-    return (
-      <View style={styles.loginScreen}>
-        <StatusBar barStyle="light-content" />
-        <View style={styles.loginGlowOne} />
-        <View style={styles.loginGlowTwo} />
-        <View style={styles.loginContent}>
-          <Brand />
-          <View style={styles.loginCopy}>
-            <Text style={styles.eyebrow}>SUA MÚSICA, DO SEU JEITO</Text>
-            <Text style={styles.loginTitle}>Bem-vindo{`\n`}de volta.</Text>
-            <Text style={styles.loginSubtitle}>
-              Entre para ouvir suas faixas e continuar de onde parou.
-            </Text>
-          </View>
-          <View style={styles.form}>
-            <Text style={styles.inputLabel}>E-mail</Text>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.input}
-              placeholder="seu@email.com"
-              placeholderTextColor="#777"
-            />
-            <View style={styles.passwordLabelRow}>
-              <Text style={styles.inputLabel}>Senha</Text>
-              <Text style={styles.mutedSmall}>Acesso de demonstração</Text>
-            </View>
-            <View style={styles.passwordInputWrap}>
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                style={styles.passwordInput}
-                placeholder="Sua senha"
-                placeholderTextColor="#777"
-              />
-              <Pressable onPress={() => setShowPassword((value) => !value)} hitSlop={12}>
-                <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={21} color="#999" />
-              </Pressable>
-            </View>
-            {!!loginError && <Text style={styles.errorText}>{loginError}</Text>}
-            <Pressable style={styles.primaryButton} onPress={login}>
-              <Text style={styles.primaryButtonText}>Entrar</Text>
-              <Ionicons name="arrow-forward" size={20} color="#111" />
-            </Pressable>
-            <Pressable style={styles.demoButton} onPress={login}>
-              <Text style={styles.demoButtonText}>Usar acesso de demonstração</Text>
-            </Pressable>
-          </View>
-          <Text style={styles.loginFooter}>Ao continuar, você concorda com nossos termos e política de privacidade.</Text>
-        </View>
-      </View>
-    );
+    return <View style={styles.login}><StatusBar barStyle="light-content" /><Logo /><View style={styles.loginCopy}><Text style={styles.eyebrow}>MÚSICA PARA TODO MOMENTO</Text><Text style={styles.loginTitle}>Milhões de músicas.{"\n"}Grátis no seu celular.</Text><Text style={styles.loginSubtitle}>Entre para ouvir suas faixas, playlists e artistas favoritos.</Text></View><Text style={styles.fieldLabel}>E-mail</Text><TextInput value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" style={styles.input} placeholder="E-mail" placeholderTextColor="#777" /><Text style={styles.fieldLabel}>Senha</Text><TextInput value={password} onChangeText={setPassword} secureTextEntry style={styles.input} placeholder="Senha" placeholderTextColor="#777" />{loginError ? <Text style={styles.error}>{loginError}</Text> : null}<Pressable style={styles.greenButton} onPress={() => { if (email.trim() === DEMO_EMAIL && password === DEMO_PASSWORD) setLoggedIn(true); else setLoginError("Use o acesso de demonstração para continuar."); }}><Text style={styles.greenButtonText}>Entrar</Text><Ionicons name="arrow-forward" size={22} color="#000" /></Pressable><Pressable onPress={() => { setEmail(DEMO_EMAIL); setPassword(DEMO_PASSWORD); setLoggedIn(true); }}><Text style={styles.demoLink}>Usar acesso de demonstração</Text></Pressable><Text style={styles.legal}>Ao continuar, você concorda com nossos termos e política de privacidade.</Text></View>;
   }
 
-  return (
-    <View style={styles.app}>
-      <StatusBar barStyle="light-content" />
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.topBar}>
-          <Pressable onPress={() => setDrawerOpen(true)} style={styles.avatarButton}>
-            <View style={styles.avatar}><Text style={styles.avatarText}>S</Text></View>
-            <View><Text style={styles.greeting}>Boa noite</Text><Text style={styles.userName}>sleep128</Text></View>
-          </Pressable>
-          <View style={styles.topActions}>
-            <Pressable style={styles.circleButton}><Ionicons name="notifications-outline" size={21} color="#f5f5f5" /></Pressable>
-            <Pressable style={styles.circleButton}><Ionicons name="settings-outline" size={21} color="#f5f5f5" /></Pressable>
-          </View>
-        </View>
+  const filtered = tracks.filter((track) => `${track.title} ${track.artist} ${track.album}`.toLowerCase().includes(query.toLowerCase()));
 
-        {screen === "home" ? (
-          <>
-            <View style={styles.heroRow}>
-              <View><Text style={styles.heroEyebrow}>SUA COLEÇÃO</Text><Text style={styles.heroTitle}>Ouça o que{`\n`}faz sentido.</Text></View>
-              <Brand compact />
-            </View>
-            <View style={styles.searchBox}><Ionicons name="search" size={20} color="#8f8f8f" /><Text style={styles.searchText}>Buscar músicas, artistas e álbuns</Text></View>
-            <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Suas faixas</Text><Text style={styles.sectionLink}>Ver tudo</Text></View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.trackScroller}>
-              {tracks.map((track) => (
-                <Pressable key={track.id} style={styles.trackCard} onPress={() => openTrack(track.id)}>
-                  <Image source={{ uri: track.cover }} style={styles.trackCover} />
-                  <View style={styles.trackCardPlay}><Ionicons name={selectedId === track.id && status.playing ? "pause" : "play"} size={16} color="#111" /></View>
-                  <Text style={styles.trackTitle} numberOfLines={1}>{track.title}</Text>
-                  <Text style={styles.trackArtist}>{track.artist}</Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-            <View style={styles.featureCard}>
-              <Image source={{ uri: selected.cover }} style={styles.featureImage} />
-              <View style={styles.featureOverlay} />
-              <View style={styles.featureCopy}><Text style={styles.featureKicker}>TOCANDO AGORA</Text><Text style={styles.featureTitle}>{selected.title}</Text><Text style={styles.featureArtist}>{selected.artist}</Text></View>
-              <Pressable style={styles.featurePlay} onPress={() => (status.playing ? player.pause() : player.play())}><Ionicons name={status.playing ? "pause" : "play"} size={25} color="#111" /></Pressable>
-            </View>
-            <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Ouvidos recentemente</Text><Ionicons name="ellipsis-horizontal" size={22} color="#999" /></View>
-            {tracks.map((track) => <Pressable key={`recent-${track.id}`} style={styles.recentRow} onPress={() => openTrack(track.id)}><Image source={{ uri: track.cover }} style={styles.recentCover} /><View style={styles.recentInfo}><Text style={styles.recentTitle}>{track.title}</Text><Text style={styles.recentArtist}>{track.artist}</Text></View><Ionicons name="play-circle-outline" size={28} color="#f2f2f2" /></Pressable>)}
-          </>
-        ) : (
-          <View style={styles.settingsPage}>
-            <Pressable onPress={() => setScreen("home")} style={styles.backButton}><Ionicons name="arrow-back" size={22} color="#f5f5f5" /><Text style={styles.backText}>Voltar</Text></Pressable>
-            <Text style={styles.settingsTitle}>Configurações{`\n`}e privacidade</Text>
-            <Text style={styles.settingsSubtitle}>Controle sua conta e sua experiência no app.</Text>
-            <View style={styles.settingsCard}><View style={styles.settingRow}><View style={styles.settingIcon}><Ionicons name="lock-closed-outline" size={21} color="#c7ff3d" /></View><View style={styles.settingCopy}><Text style={styles.settingTitle}>Conta privada</Text><Text style={styles.settingDescription}>Somente você pode ver suas playlists.</Text></View><Switch value={privateAccount} onValueChange={setPrivateAccount} trackColor={{ false: "#444", true: "#718e24" }} thumbColor={privateAccount ? "#c7ff3d" : "#aaa"} /></View><View style={styles.divider} /><View style={styles.settingRow}><View style={styles.settingIcon}><Ionicons name="download-outline" size={21} color="#c7ff3d" /></View><View style={styles.settingCopy}><Text style={styles.settingTitle}>Downloads</Text><Text style={styles.settingDescription}>Gerencie músicas disponíveis offline.</Text></View><Ionicons name="chevron-forward" size={19} color="#777" /></View><View style={styles.divider} /><View style={styles.settingRow}><View style={styles.settingIcon}><Ionicons name="shield-checkmark-outline" size={21} color="#c7ff3d" /></View><View style={styles.settingCopy}><Text style={styles.settingTitle}>Privacidade e dados</Text><Text style={styles.settingDescription}>Escolha como seus dados são usados.</Text></View><Ionicons name="chevron-forward" size={19} color="#777" /></View></View>
-            <Pressable style={styles.logoutButton} onPress={() => { setLoggedIn(false); setDrawerOpen(false); }}><Ionicons name="log-out-outline" size={20} color="#f26f6f" /><Text style={styles.logoutText}>Sair da conta</Text></Pressable>
-          </View>
-        )}
-      </ScrollView>
+  const renderHome = () => <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}><View style={styles.topBar}><Pressable onPress={() => setDrawer(true)}><View style={styles.avatar}><Text style={styles.avatarText}>S</Text></View></Pressable><View style={styles.topActions}><Ionicons name="notifications-outline" size={25} color="#fff" /><Ionicons name="time-outline" size={25} color="#fff" /><Ionicons name="settings-outline" size={24} color="#fff" /></View></View><Text style={styles.greeting}>Boa noite</Text><View style={styles.quickGrid}>{albums.slice(0, 4).map((item) => <Pressable key={item.title} style={styles.quickCard} onPress={() => openTrack(tracks[0].id)}><Image source={item.image} style={styles.quickImage} /><Text numberOfLines={2} style={styles.quickTitle}>{item.title}</Text><Ionicons name="play-circle" size={28} color="#1ed760" /></Pressable>)}</View><AlbumRow title="Sua rotação" data={albums} onPress={() => openTrack(tracks[0].id)} /><AlbumRow title="Feito para sleep128" data={[...albums].reverse()} onPress={() => openTrack(tracks[1].id)} /><View style={styles.section}><Text style={styles.sectionTitle}>Tocadas recentemente</Text>{tracks.map((track) => <Pressable key={track.id} style={styles.trackRow} onPress={() => openTrack(track.id)}><Image source={track.image} style={styles.trackImage} /><View style={styles.trackMeta}><Text style={styles.trackTitle}>{track.title}</Text><Text style={styles.trackArtist}>{track.artist} · {track.album}</Text></View><Ionicons name="ellipsis-vertical" size={20} color="#aaa" /></Pressable>)}</View></ScrollView>;
+  const renderSearch = () => <ScrollView contentContainerStyle={styles.content}><Text style={styles.pageTitle}>Buscar</Text><View style={styles.searchBox}><Ionicons name="search" size={23} color="#111" /><TextInput value={query} onChangeText={setQuery} placeholder="O que você quer ouvir?" placeholderTextColor="#555" style={styles.searchInput} /></View>{query ? <View style={styles.section}><Text style={styles.sectionTitle}>Resultados</Text>{filtered.map((track) => <Pressable key={track.id} style={styles.trackRow} onPress={() => openTrack(track.id)}><Image source={track.image} style={styles.trackImage} /><View style={styles.trackMeta}><Text style={styles.trackTitle}>{track.title}</Text><Text style={styles.trackArtist}>{track.artist}</Text></View><Ionicons name="play-circle-outline" size={28} color="#fff" /></Pressable>)}</View> : <><Text style={styles.sectionTitle}>Navegar por todas</Text><View style={styles.browseGrid}>{browse.map(([label, color]) => <Pressable key={label} style={[styles.browseCard, { backgroundColor: color }]}><Text style={styles.browseText}>{label}</Text><Ionicons name="musical-notes" size={43} color="rgba(0,0,0,.25)" /></Pressable>)}</View></>}</ScrollView>;
+  const renderLibrary = () => <ScrollView contentContainerStyle={styles.content}><Text style={styles.pageTitle}>Sua Biblioteca</Text><View style={styles.libraryFilters}><Text style={styles.filterActive}>Playlists</Text><Text style={styles.filter}>Artistas</Text><Text style={styles.filter}>Álbuns</Text></View>{albums.map((item, index) => <Pressable key={item.title} style={styles.libraryRow} onPress={() => openTrack(index % tracks.length === 0 ? tracks[0].id : tracks[index % tracks.length].id)}><Image source={item.image} style={styles.libraryImage} /><View><Text style={styles.libraryTitle}>{item.title}</Text><Text style={styles.librarySubtitle}>Playlist · {item.subtitle}</Text></View></Pressable>)}</ScrollView>;
+  const renderSettings = () => <ScrollView contentContainerStyle={styles.content}><Pressable onPress={() => setSettings(false)} style={styles.back}><Ionicons name="arrow-back" size={24} color="#fff" /><Text style={styles.backText}>Voltar</Text></Pressable><Text style={styles.pageTitle}>Configurações e privacidade</Text><View style={styles.profileCard}><View style={styles.bigAvatar}><Text style={styles.avatarText}>S</Text></View><View><Text style={styles.profileName}>sleep128</Text><Text style={styles.profileEmail}>{DEMO_EMAIL}</Text></View></View>{["Conta", "Privacidade e dados", "Notificações", "Dispositivos", "Sobre o app"].map((item) => <View key={item} style={styles.settingRow}><Ionicons name="chevron-forward" size={21} color="#aaa" /><Text style={styles.settingText}>{item}</Text></View>)}<Pressable style={styles.originalButton} onPress={openOriginal}><Ionicons name="open-outline" size={20} color="#000" /><Text style={styles.originalButtonText}>Abrir tela original</Text></Pressable></ScrollView>;
 
-      <View style={styles.playerBar}><Image source={{ uri: selected.cover }} style={styles.playerCover} /><View style={styles.playerInfo}><Text style={styles.playerTitle} numberOfLines={1}>{selected.title}</Text><Text style={styles.playerArtist}>{selected.artist}</Text><View style={styles.progressTrack}><View style={[styles.progressValue, { width: `${status.duration ? Math.min(100, (status.currentTime / status.duration) * 100) : 0}%` }]} /></View></View><Pressable onPress={() => (status.playing ? player.pause() : player.play())} style={styles.playerButton}><Ionicons name={status.playing ? "pause" : "play"} size={18} color="#111" /></Pressable><Pressable onPress={nextTrack} style={styles.nextButton}><Ionicons name="play-skip-forward" size={19} color="#f5f5f5" /></Pressable></View>
-
-      <Modal visible={drawerOpen} transparent animationType="slide" onRequestClose={() => setDrawerOpen(false)}>
-        <View style={styles.drawerBackdrop}><Pressable style={styles.drawerDismiss} onPress={() => setDrawerOpen(false)} /><View style={styles.drawer}><View style={styles.drawerHandle} /><View style={styles.drawerProfile}><View style={styles.drawerAvatar}><Text style={styles.drawerAvatarText}>S</Text></View><View><Text style={styles.drawerName}>sleep128</Text><Text style={styles.drawerProfileLink}>Ver perfil</Text></View></View><View style={styles.drawerDivider} />{[["add-circle-outline", "Adicionar conta"], ["diamond-outline", "Seu Premium"], ["sparkles-outline", "Novidades"], ["time-outline", "Recentes"], ["megaphone-outline", "Suas atualizações"]].map(([icon, label]) => <Pressable key={label} style={styles.drawerItem} onPress={() => setDrawerOpen(false)}><Ionicons name={icon as keyof typeof Ionicons.glyphMap} size={27} color="#f4f4f4" /><Text style={styles.drawerItemText}>{label}</Text>{label === "Seu Premium" && <Text style={styles.premiumPill}>PREMIUM</Text>}{label === "Suas atualizações" && <View style={styles.updateDot} />}</Pressable>)}<Pressable style={[styles.drawerItem, styles.drawerSettings]} onPress={() => { setDrawerOpen(false); Linking.openURL(ORIGINAL_APP_URL).catch(() => undefined); }}><Ionicons name="settings-outline" size={28} color="#f4f4f4" /><Text style={styles.drawerItemText}>Configurações e privacidade</Text></Pressable><View style={styles.drawerDivider} /><Text style={styles.drawerSection}>MENSAGENS</Text><View style={styles.messageRow}><View style={styles.messageAvatar}><Text style={styles.messageAvatarText}>M</Text></View><View><Text style={styles.messageName}>musicmenu</Text><Text style={styles.messagePreview}>Sua nova coleção está pronta</Text></View></View><Pressable style={styles.newMessage}><Ionicons name="create-outline" size={27} color="#f4f4f4" /><Text style={styles.drawerItemText}>Nova mensagem</Text></Pressable></View></View>
-      </Modal>
-    </View>
-  );
+  return <View style={styles.app}><StatusBar barStyle="light-content" /><View style={styles.main}>{settings ? renderSettings() : tab === "home" ? renderHome() : tab === "search" ? renderSearch() : renderLibrary()}</View><View style={styles.bottomTab}><Pressable onPress={() => setTab("home")} style={styles.tabButton}><Ionicons name={tab === "home" ? "home" : "home-outline"} size={25} color={tab === "home" ? "#fff" : "#999"} /><Text style={[styles.tabLabel, tab === "home" && styles.tabLabelActive]}>Início</Text></Pressable><Pressable onPress={() => setTab("search")} style={styles.tabButton}><Ionicons name={tab === "search" ? "search" : "search-outline"} size={25} color={tab === "search" ? "#fff" : "#999"} /><Text style={[styles.tabLabel, tab === "search" && styles.tabLabelActive]}>Buscar</Text></Pressable><Pressable onPress={() => setTab("library")} style={styles.tabButton}><Ionicons name={tab === "library" ? "library" : "library-outline"} size={25} color={tab === "library" ? "#fff" : "#999"} /><Text style={[styles.tabLabel, tab === "library" && styles.tabLabelActive]}>Sua Biblioteca</Text></Pressable></View><Pressable style={styles.playerBar} onPress={() => openTrack(selected.id)}><Image source={selected.image} style={styles.playerImage} /><View style={styles.playerMeta}><Text numberOfLines={1} style={styles.playerTitle}>{selected.title}</Text><Text numberOfLines={1} style={styles.playerArtist}>{selected.artist}</Text></View><Ionicons name="heart-outline" size={22} color="#fff" /><Pressable onPress={() => status.playing ? player.pause() : player.play()}><Ionicons name={status.playing ? "pause" : "play"} size={25} color="#fff" /></Pressable></Pressable><Modal visible={drawer} transparent animationType="slide" onRequestClose={() => setDrawer(false)}><View style={styles.drawerBackdrop}><Pressable style={styles.drawerDismiss} onPress={() => setDrawer(false)} /><View style={styles.drawer}><View style={styles.drawerHandle} /><View style={styles.drawerProfile}><View style={styles.bigAvatar}><Text style={styles.avatarText}>S</Text></View><View><Text style={styles.profileName}>sleep128</Text><Text style={styles.profileEmail}>Ver perfil</Text></View></View>{["Conta", "Seu Premium", "Novidades", "Recentes", "Suas atualizações"].map((item) => <Pressable key={item} style={styles.drawerItem} onPress={() => setDrawer(false)}><Ionicons name="ellipse-outline" size={18} color="#fff" /><Text style={styles.drawerItemText}>{item}</Text></Pressable>)}<View style={styles.drawerDivider} /><Pressable style={styles.drawerItem} onPress={() => { setDrawer(false); setSettings(true); }}><Ionicons name="settings-outline" size={22} color="#fff" /><Text style={styles.drawerItemText}>Configurações e privacidade</Text></Pressable><Pressable style={styles.drawerItem} onPress={openOriginal}><Ionicons name="log-out-outline" size={22} color="#fff" /><Text style={styles.drawerItemText}>Abrir app original</Text></Pressable></View></View></Modal></View>;
 }
 
 const styles = StyleSheet.create({
-  app: { flex: 1, backgroundColor: "#101010" },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 58, paddingBottom: 132 },
-  loginScreen: { flex: 1, backgroundColor: "#101010", overflow: "hidden" },
-  loginContent: { flex: 1, paddingHorizontal: 28, paddingTop: 70, paddingBottom: 26, justifyContent: "space-between" },
-  loginGlowOne: { position: "absolute", width: 280, height: 280, borderRadius: 140, backgroundColor: "#35451a", opacity: 0.45, top: -140, right: -80 },
-  loginGlowTwo: { position: "absolute", width: 240, height: 240, borderRadius: 120, backgroundColor: "#42243c", opacity: 0.5, bottom: 20, left: -140 },
-  brandRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  brandMark: { width: 36, height: 36, borderRadius: 12, backgroundColor: "#c7ff3d", alignItems: "center", justifyContent: "center", transform: [{ rotate: "-8deg" }] },
-  brandText: { color: "#f8f8f8", fontSize: 23, fontWeight: "800", letterSpacing: -0.8 },
-  loginCopy: { marginTop: 36 },
-  eyebrow: { color: "#c7ff3d", fontSize: 11, fontWeight: "800", letterSpacing: 2.2, marginBottom: 13 },
-  loginTitle: { color: "#fff", fontSize: 48, lineHeight: 51, fontWeight: "800", letterSpacing: -1.7 },
-  loginSubtitle: { color: "#a5a5a5", fontSize: 15, lineHeight: 22, marginTop: 18, maxWidth: 315 },
-  form: { marginTop: 10 },
-  inputLabel: { color: "#e8e8e8", fontSize: 12, fontWeight: "700", marginBottom: 8 },
-  input: { height: 54, backgroundColor: "#1d1d1d", borderWidth: 1, borderColor: "#333", borderRadius: 14, color: "#fff", paddingHorizontal: 16, fontSize: 15, marginBottom: 17 },
-  passwordLabelRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  mutedSmall: { color: "#777", fontSize: 11, marginBottom: 8 },
-  passwordInputWrap: { height: 54, backgroundColor: "#1d1d1d", borderWidth: 1, borderColor: "#333", borderRadius: 14, flexDirection: "row", alignItems: "center", paddingHorizontal: 16 },
-  passwordInput: { flex: 1, color: "#fff", fontSize: 15 },
-  errorText: { color: "#f07979", fontSize: 12, marginTop: 8 },
-  primaryButton: { height: 55, marginTop: 22, backgroundColor: "#c7ff3d", borderRadius: 15, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12 },
-  primaryButtonText: { color: "#111", fontSize: 16, fontWeight: "800" },
-  demoButton: { alignItems: "center", marginTop: 17, padding: 8 },
-  demoButtonText: { color: "#a9a9a9", fontSize: 13, fontWeight: "600" },
-  loginFooter: { color: "#686868", textAlign: "center", fontSize: 11, lineHeight: 17, paddingHorizontal: 20 },
-  topBar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 29 },
-  avatarButton: { flexDirection: "row", alignItems: "center", gap: 10 },
-  avatar: { width: 43, height: 43, borderRadius: 22, backgroundColor: "#bd7d9a", alignItems: "center", justifyContent: "center" },
-  avatarText: { color: "#fff", fontWeight: "800", fontSize: 19 },
-  greeting: { color: "#8f8f8f", fontSize: 11, marginBottom: 2 },
-  userName: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  topActions: { flexDirection: "row", gap: 8 },
-  circleButton: { width: 38, height: 38, borderRadius: 19, backgroundColor: "#1d1d1d", alignItems: "center", justifyContent: "center" },
-  heroRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 24 },
-  heroEyebrow: { color: "#c7ff3d", fontSize: 11, fontWeight: "800", letterSpacing: 1.8, marginBottom: 10 },
-  heroTitle: { color: "#fff", fontSize: 35, lineHeight: 37, fontWeight: "800", letterSpacing: -1.2 },
-  searchBox: { height: 52, borderRadius: 15, backgroundColor: "#1d1d1d", flexDirection: "row", alignItems: "center", paddingHorizontal: 16, gap: 11, marginBottom: 31 },
-  searchText: { color: "#777", fontSize: 13 },
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 15, marginTop: 2 },
-  sectionTitle: { color: "#f4f4f4", fontSize: 19, fontWeight: "800", letterSpacing: -0.3 },
-  sectionLink: { color: "#c7ff3d", fontSize: 12, fontWeight: "700" },
-  trackScroller: { gap: 15, paddingBottom: 28 },
-  trackCard: { width: 146, position: "relative" },
-  trackCover: { width: 146, height: 146, borderRadius: 12, backgroundColor: "#303030" },
-  trackCardPlay: { position: "absolute", right: 10, top: 111, width: 35, height: 35, borderRadius: 18, backgroundColor: "#c7ff3d", alignItems: "center", justifyContent: "center" },
-  trackTitle: { color: "#f6f6f6", fontSize: 13, fontWeight: "700", marginTop: 11 },
-  trackArtist: { color: "#858585", fontSize: 12, marginTop: 4 },
-  featureCard: { height: 206, borderRadius: 18, overflow: "hidden", marginBottom: 29, backgroundColor: "#282828" },
-  featureImage: { width: "100%", height: "100%", position: "absolute" },
-  featureOverlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.48)" },
-  featureCopy: { position: "absolute", left: 18, bottom: 20 },
-  featureKicker: { color: "#c7ff3d", fontSize: 10, fontWeight: "800", letterSpacing: 1.6, marginBottom: 7 },
-  featureTitle: { color: "#fff", fontSize: 22, fontWeight: "800", maxWidth: 235 },
-  featureArtist: { color: "#d0d0d0", fontSize: 13, marginTop: 4 },
-  featurePlay: { position: "absolute", bottom: 19, right: 18, width: 54, height: 54, borderRadius: 27, backgroundColor: "#c7ff3d", alignItems: "center", justifyContent: "center" },
-  recentRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 9 },
-  recentCover: { width: 52, height: 52, borderRadius: 8, backgroundColor: "#333" },
-  recentInfo: { flex: 1 },
-  recentTitle: { color: "#eee", fontSize: 14, fontWeight: "700" },
-  recentArtist: { color: "#858585", fontSize: 12, marginTop: 5 },
-  playerBar: { position: "absolute", left: 12, right: 12, bottom: 14, minHeight: 71, borderRadius: 18, backgroundColor: "#242424", borderWidth: 1, borderColor: "#383838", padding: 9, flexDirection: "row", alignItems: "center", gap: 10 },
-  playerCover: { width: 52, height: 52, borderRadius: 11 },
-  playerInfo: { flex: 1 },
-  playerTitle: { color: "#f3f3f3", fontSize: 12, fontWeight: "700" },
-  playerArtist: { color: "#858585", fontSize: 11, marginTop: 3, marginBottom: 7 },
-  progressTrack: { height: 3, borderRadius: 3, backgroundColor: "#4a4a4a", overflow: "hidden" },
-  progressValue: { height: 3, backgroundColor: "#c7ff3d" },
-  playerButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: "#c7ff3d", alignItems: "center", justifyContent: "center" },
-  nextButton: { width: 28, alignItems: "center" },
-  drawerBackdrop: { flex: 1, flexDirection: "row", backgroundColor: "rgba(0,0,0,0.54)" },
-  drawerDismiss: { flex: 1 },
-  drawer: { width: "86%", backgroundColor: "#202020", paddingHorizontal: 26, paddingTop: 58, paddingBottom: 25, shadowColor: "#000", shadowOpacity: 0.5, shadowRadius: 22, elevation: 12 },
-  drawerHandle: { alignSelf: "center", width: 36, height: 4, borderRadius: 3, backgroundColor: "#666", marginBottom: 30 },
-  drawerProfile: { flexDirection: "row", alignItems: "center", gap: 15, marginBottom: 23 },
-  drawerAvatar: { width: 62, height: 62, borderRadius: 31, backgroundColor: "#bd7d9a", alignItems: "center", justifyContent: "center" },
-  drawerAvatarText: { color: "#fff", fontWeight: "800", fontSize: 28 },
-  drawerName: { color: "#f6f6f6", fontSize: 19, fontWeight: "800" },
-  drawerProfileLink: { color: "#aaa", fontSize: 14, marginTop: 5 },
-  drawerDivider: { height: 1, backgroundColor: "#3a3a3a", marginVertical: 15 },
-  drawerItem: { height: 57, flexDirection: "row", alignItems: "center", gap: 20, position: "relative" },
-  drawerSettings: { marginTop: 7 },
-  drawerItemText: { color: "#f2f2f2", fontSize: 16, fontWeight: "600", flex: 1 },
-  premiumPill: { color: "#171717", backgroundColor: "#f1b4cb", fontSize: 9, fontWeight: "900", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 7 },
-  updateDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: "#278bff", marginRight: 4 },
-  drawerSection: { color: "#f1f1f1", fontSize: 18, fontWeight: "900", marginBottom: 12, letterSpacing: 0.3 },
-  messageRow: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 16 },
-  messageAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#66485a", alignItems: "center", justifyContent: "center" },
-  messageAvatarText: { color: "#fff", fontSize: 17, fontWeight: "800" },
-  messageName: { color: "#eee", fontSize: 14, fontWeight: "700" },
-  messagePreview: { color: "#999", fontSize: 12, marginTop: 4 },
-  newMessage: { flexDirection: "row", alignItems: "center", gap: 20, paddingVertical: 15 },
-  settingsPage: { paddingTop: 10 },
-  backButton: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 35 },
-  backText: { color: "#ddd", fontSize: 14, fontWeight: "700" },
-  settingsTitle: { color: "#fff", fontSize: 38, lineHeight: 40, fontWeight: "800", letterSpacing: -1 },
-  settingsSubtitle: { color: "#929292", fontSize: 14, lineHeight: 21, marginTop: 13, marginBottom: 28 },
-  settingsCard: { backgroundColor: "#1d1d1d", borderRadius: 17, paddingHorizontal: 16 },
-  settingRow: { minHeight: 82, flexDirection: "row", alignItems: "center", gap: 13 },
-  settingIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: "#303c18", alignItems: "center", justifyContent: "center" },
-  settingCopy: { flex: 1 },
-  settingTitle: { color: "#f2f2f2", fontSize: 14, fontWeight: "700" },
-  settingDescription: { color: "#888", fontSize: 11, marginTop: 4 },
-  divider: { height: 1, backgroundColor: "#343434" },
-  logoutButton: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 24, padding: 8 },
-  logoutText: { color: "#f07979", fontSize: 14, fontWeight: "700" },
+  app: { flex: 1, backgroundColor: "#121212" }, main: { flex: 1 }, content: { padding: 18, paddingBottom: 150 }, logoRow: { flexDirection: "row", alignItems: "center", gap: 10 }, logoCircle: { width: 42, height: 42, borderRadius: 22, backgroundColor: "#1ed760", alignItems: "center", justifyContent: "center" }, logoText: { color: "#fff", fontSize: 28, fontWeight: "800" }, login: { flex: 1, backgroundColor: "#121212", padding: 28, paddingTop: 58 }, loginCopy: { marginTop: 70, marginBottom: 36 }, eyebrow: { color: "#1ed760", fontSize: 12, fontWeight: "800", letterSpacing: 1.5, marginBottom: 16 }, loginTitle: { color: "#fff", fontSize: 36, lineHeight: 39, fontWeight: "800" }, loginSubtitle: { color: "#b3b3b3", fontSize: 15, lineHeight: 22, marginTop: 18 }, fieldLabel: { color: "#fff", fontSize: 13, fontWeight: "700", marginBottom: 8, marginTop: 12 }, input: { height: 52, borderRadius: 6, paddingHorizontal: 16, color: "#fff", backgroundColor: "#2a2a2a", fontSize: 15 }, greenButton: { height: 52, backgroundColor: "#1ed760", borderRadius: 28, marginTop: 25, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: 10 }, greenButtonText: { color: "#000", fontWeight: "800", fontSize: 16 }, demoLink: { textAlign: "center", color: "#fff", fontWeight: "700", marginTop: 22 }, legal: { color: "#777", textAlign: "center", fontSize: 11, lineHeight: 17, marginTop: 38 }, error: { color: "#f28b82", fontSize: 12, marginTop: 8 }, topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }, avatar: { width: 34, height: 34, borderRadius: 18, backgroundColor: "#a87448", alignItems: "center", justifyContent: "center" }, avatarText: { color: "#fff", fontWeight: "800", fontSize: 17 }, topActions: { flexDirection: "row", gap: 20 }, greeting: { color: "#fff", fontSize: 25, fontWeight: "800", marginBottom: 18 }, quickGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 26 }, quickCard: { width: "48%", height: 58, backgroundColor: "#2a2a2a", borderRadius: 5, flexDirection: "row", alignItems: "center", overflow: "hidden" }, quickImage: { width: 58, height: 58 }, quickTitle: { color: "#fff", fontSize: 12, fontWeight: "700", flex: 1, paddingHorizontal: 8 }, section: { marginTop: 24 }, sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }, sectionTitle: { color: "#fff", fontSize: 20, fontWeight: "800", marginBottom: 14 }, showAll: { color: "#b3b3b3", fontSize: 12, fontWeight: "700" }, horizontal: { gap: 16 }, albumCard: { width: 145 }, albumImage: { width: 145, height: 145, borderRadius: 3 }, albumTitle: { color: "#fff", fontSize: 14, fontWeight: "700", marginTop: 9 }, albumSubtitle: { color: "#a7a7a7", fontSize: 12, marginTop: 4 }, trackRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8, gap: 12 }, trackImage: { width: 54, height: 54 }, trackMeta: { flex: 1 }, trackTitle: { color: "#fff", fontSize: 14, fontWeight: "700" }, trackArtist: { color: "#aaa", fontSize: 12, marginTop: 4 }, bottomTab: { position: "absolute", left: 0, right: 0, bottom: 0, height: 76, backgroundColor: "#090909", flexDirection: "row", justifyContent: "space-around", paddingTop: 10 }, tabButton: { alignItems: "center", width: "33%" }, tabLabel: { color: "#999", fontSize: 10, marginTop: 3 }, tabLabelActive: { color: "#fff" }, playerBar: { position: "absolute", left: 8, right: 8, bottom: 78, height: 60, borderRadius: 4, backgroundColor: "#282828", flexDirection: "row", alignItems: "center", paddingHorizontal: 10, gap: 10 }, playerImage: { width: 42, height: 42 }, playerMeta: { flex: 1 }, playerTitle: { color: "#fff", fontWeight: "700", fontSize: 13 }, playerArtist: { color: "#b3b3b3", fontSize: 11, marginTop: 3 }, pageTitle: { color: "#fff", fontSize: 29, fontWeight: "800", marginTop: 16, marginBottom: 22 }, searchBox: { height: 52, backgroundColor: "#fff", borderRadius: 5, flexDirection: "row", alignItems: "center", paddingHorizontal: 15, gap: 10, marginBottom: 25 }, searchInput: { flex: 1, color: "#111", fontSize: 15 }, browseGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 }, browseCard: { width: "47.5%", height: 105, borderRadius: 6, padding: 13, overflow: "hidden", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }, browseText: { color: "#fff", fontSize: 17, fontWeight: "800" }, libraryFilters: { flexDirection: "row", gap: 9, marginBottom: 20 }, filterActive: { borderColor: "#fff", borderWidth: 1, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, color: "#fff" }, filter: { borderColor: "#555", borderWidth: 1, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, color: "#fff" }, libraryRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 15 }, libraryImage: { width: 64, height: 64 }, libraryTitle: { color: "#fff", fontSize: 15, fontWeight: "700" }, librarySubtitle: { color: "#aaa", fontSize: 12, marginTop: 5 }, back: { flexDirection: "row", alignItems: "center", gap: 9, marginTop: 12, marginBottom: 15 }, backText: { color: "#fff", fontSize: 15 }, profileCard: { flexDirection: "row", alignItems: "center", gap: 15, paddingVertical: 18, borderBottomColor: "#333", borderBottomWidth: 1, marginBottom: 12 }, bigAvatar: { width: 62, height: 62, borderRadius: 31, backgroundColor: "#a87448", alignItems: "center", justifyContent: "center" }, profileName: { color: "#fff", fontSize: 17, fontWeight: "700" }, profileEmail: { color: "#aaa", fontSize: 12, marginTop: 4 }, settingRow: { height: 58, borderBottomColor: "#2b2b2b", borderBottomWidth: 1, flexDirection: "row-reverse", alignItems: "center", justifyContent: "space-between" }, settingText: { color: "#fff", fontSize: 15 }, originalButton: { height: 50, backgroundColor: "#1ed760", borderRadius: 25, marginTop: 28, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 9 }, originalButtonText: { color: "#000", fontWeight: "800" }, drawerBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,.7)", justifyContent: "flex-end" }, drawerDismiss: { flex: 1 }, drawer: { backgroundColor: "#181818", padding: 22, paddingBottom: 36, borderTopLeftRadius: 18, borderTopRightRadius: 18 }, drawerHandle: { alignSelf: "center", width: 45, height: 4, borderRadius: 3, backgroundColor: "#777", marginBottom: 22 }, drawerProfile: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 18 }, drawerItem: { flexDirection: "row", alignItems: "center", gap: 15, paddingVertical: 13 }, drawerItemText: { color: "#fff", fontSize: 15, fontWeight: "600" }, drawerDivider: { height: 1, backgroundColor: "#333", marginVertical: 7 },
 });
