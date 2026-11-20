@@ -61,14 +61,14 @@ jobs:
           rm -rf Payload dist
           mkdir -p Payload dist
           cp -R "$APP_PATH" Payload/
-          zip -qry dist/musicmenu-unsigned.ipa Payload
-          zip -qry dist/musicmenu-gbox-source.zip . \
-            -x '.git/*' \
-            -x 'node_modules/*' \
-            -x 'ios/Pods/*' \
-            -x 'build/*' \
-            -x 'Payload/*' \
-            -x 'dist/*'
+          ditto -c -k --sequesterRsrc --keepParent Payload dist/musicmenu-unsigned.ipa
+          tar --exclude='./.git' \
+            --exclude='./node_modules' \
+            --exclude='./ios/Pods' \
+            --exclude='./build' \
+            --exclude='./Payload' \
+            --exclude='./dist' \
+            -czf dist/musicmenu-gbox-source.tar.gz .
 
       - name: Enviar IPA e fonte para artefatos
         uses: actions/upload-artifact@v4
@@ -76,4 +76,4 @@ jobs:
           name: musicmenu-ios-gbox
           path: |
             dist/musicmenu-unsigned.ipa
-            dist/musicmenu-gbox-source.zip
+            dist/musicmenu-gbox-source.tar.gz
