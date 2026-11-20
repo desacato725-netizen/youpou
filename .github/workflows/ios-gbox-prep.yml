@@ -1,4 +1,4 @@
-name: Preparar build iOS para GBox
+name: Compilar IPA para GBox
 
 on:
   push:
@@ -6,8 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate-and-package:
-    runs-on: ubuntu-latest
+  ios-build:
+    runs-on: macos-latest
+    timeout-minutes: 45
     steps:
       - name: Baixar código
         uses: actions/checkout@v4
@@ -23,28 +24,56 @@ jobs:
         with:
           version: 9.12.0
 
-      - name: Instalar dependências
+      - name: Instalar dependências JavaScript
         run: pnpm install --frozen-lockfile
 
       - name: Verificar TypeScript
         run: pnpm check
 
-      - name: Exportar bundle iOS
-        run: npx expo export --platform ios --output-dir dist/ios
+      - name: Gerar projeto nativo iOS
+        run: npx expo prebuild --platform ios --no-install --clean
 
-      - name: Empacotar projeto para o GBox
+      - name: Instalar Pods
+        working-directory: ios
+        run: pod install
+
+      - name: Compilar app iOS sem assinatura
         run: |
-          mkdir -p dist/gbox
-          zip -qr dist/gbox/musicmenu-gbox-source.zip . \
-            -x 'node_modules/*' \
-            -x '.git/*' \
-            -x 'dist/*' \
-            -x '.expo/*'
+          WORKSPACE=$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)
+          SCHEME=$(xcodebuild -list -workspace "$WORKSPACE" | awk '/Schemes:/{getline; gsub(/^ +| +$/, ""); print; exit}')
+          echo "Workspace: $WORKSPACE"
+          echo "Scheme: $SCHEME"
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            ONLY_ACTIVE_ARCH=NO \
+            build
 
-      - name: Disponibilizar artefatos
+      - name: Empacotar IPA não assinada
+        run: |
+          APP_PATH=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name '*.app' -print -quit)
+          test -n "$APP_PATH"
+          rm -rf Payload dist
+          mkdir -p Payload dist
+          cp -R "$APP_PATH" Payload/
+          zip -qry dist/musicmenu-unsigned.ipa Payload
+          zip -qry dist/musicmenu-gbox-source.zip . \
+            -x '.git/*' \
+            -x 'node_modules/*' \
+            -x 'ios/Pods/*' \
+            -x 'build/*' \
+            -x 'Payload/*' \
+            -x 'dist/*'
+
+      - name: Enviar IPA e fonte para artefatos
         uses: actions/upload-artifact@v4
         with:
           name: musicmenu-ios-gbox
           path: |
-            dist/ios
-            dist/gbox/musicmenu-gbox-source.zip
+            dist/musicmenu-unsigned.ipa
+            dist/musicmenu-gbox-source.zip
