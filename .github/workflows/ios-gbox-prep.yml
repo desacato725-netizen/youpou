@@ -40,7 +40,7 @@ jobs:
       - name: Compilar app iOS sem assinatura
         run: |
           WORKSPACE=$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)
-          SCHEME=$(xcodebuild -list -workspace "$WORKSPACE" | awk '/Schemes:/{getline; gsub(/^ +| +$/, ""); print; exit}')
+          SCHEME=MusicMenu
           echo "Workspace: $WORKSPACE"
           echo "Scheme: $SCHEME"
           xcodebuild \
