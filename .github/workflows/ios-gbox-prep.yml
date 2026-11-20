@@ -61,7 +61,8 @@ jobs:
           rm -rf Payload dist
           mkdir -p Payload dist
           cp -R "$APP_PATH" Payload/
-          ditto -c -k --sequesterRsrc --keepParent Payload dist/musicmenu-unsigned.ipa
+          (cd Payload && /usr/bin/zip -qry ../dist/musicmenu-unsigned.ipa .)
+          test -s dist/musicmenu-unsigned.ipa
 
       - name: Enviar IPA e fonte para artefatos
         uses: actions/upload-artifact@v4
