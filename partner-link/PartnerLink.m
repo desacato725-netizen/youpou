@@ -75,20 +75,8 @@ static void partner_link_open_inter(void) {
   if (partner_link_opening) return;
   partner_link_opening = YES;
   dispatch_async(dispatch_get_main_queue(), ^{
-    NSURL *url = [NSURL URLWithString:@"interparceria://home"];
-    NSURL *containerURL = [NSURL URLWithString:@"livecontainer://livecontainer-launch?bundle-name=3105.app&urlscheme=interparceria%3A%2F%2Fhome"];
-    if (@available(iOS 10.0, *)) {
-      [UIApplication.sharedApplication openURL:url options:@{} completionHandler:^(BOOL success) {
-        if (!success) {
-          [UIApplication.sharedApplication openURL:containerURL options:@{} completionHandler:nil];
-        }
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ partner_link_opening = NO; });
-      }];
-    } else {
-      BOOL success = [UIApplication.sharedApplication openURL:url];
-      if (!success) [UIApplication.sharedApplication openURL:containerURL];
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ partner_link_opening = NO; });
-    }
+    partner_link_present_embedded_inter();
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ partner_link_opening = NO; });
   });
 }
 
