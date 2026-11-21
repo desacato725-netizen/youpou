@@ -80,6 +80,7 @@ html,body{font-family:SpotifyCircular,-apple-system,BlinkMacSystemFont,"Helvetic
 /* Ícones de marca recortados no contorno correto. */
 .brand-img{left:26px;width:29px;height:29px;object-fit:contain}
 .google-img{width:29px;height:29px}.facebook-img{width:29px;height:29px}.apple-img{width:30px;height:30px}
+.apple-img{transform:translateY(-60%)}
 .bottom{background:#121212}
 .bottom .bottom-icon{object-fit:cover}
 .player button:first-of-type{background-image:url('queueicon.svg');background-size:24px 24px}
