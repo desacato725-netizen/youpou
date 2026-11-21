@@ -64,6 +64,7 @@ jobs:
           ncmds, sizeofcmds = struct.unpack_from('<II', b, 16)
           off=32
           text_fileoff=None
+          dylinker_off=None
           has_id=False
           for _ in range(ncmds):
               cmd, cmdsize = struct.unpack_from('<II', b, off)
@@ -75,18 +76,29 @@ jobs:
                       text_fileoff=struct.unpack_from('<Q', b, off+40)[0]
               if cmd == 0xd: # LC_ID_DYLIB
                   has_id=True
+              if cmd == 0xe: # LC_LOAD_DYLINKER; can be repurposed by the loader
+                  dylinker_off=off
               off += cmdsize
           if not has_id:
               name=b'InterGuest/3105\0'
               cmdsize=(24+len(name)+7)&~7
-              if text_fileoff is None or 32+sizeofcmds+cmdsize > text_fileoff:
-                  raise SystemExit('Sem espaço para LC_ID_DYLIB')
               insert=32+sizeofcmds
-              struct.pack_into('<II', b, insert, 0xd, cmdsize)
-              struct.pack_into('<I', b, insert+8, 24)
-              b[insert+24:insert+24+len(name)]=name
-              struct.pack_into('<I', b, 16, ncmds+1)
-              struct.pack_into('<I', b, 20, sizeofcmds+cmdsize)
+              if text_fileoff is not None and insert+cmdsize <= text_fileoff:
+                  struct.pack_into('<II', b, insert, 0xd, cmdsize)
+                  struct.pack_into('<I', b, insert+8, 24)
+                  b[insert+24:insert+24+len(name)]=name
+                  struct.pack_into('<I', b, 16, ncmds+1)
+                  struct.pack_into('<I', b, 20, sizeofcmds+cmdsize)
+              elif dylinker_off is not None:
+                  oldsize=struct.unpack_from('<I', b, dylinker_off+4)[0]
+                  short_name=b'3105\0'
+                  if oldsize < 24+len(short_name):
+                      raise SystemExit('Sem espaço para LC_ID_DYLIB')
+                  struct.pack_into('<II', b, dylinker_off, 0xd, oldsize)
+                  struct.pack_into('<I', b, dylinker_off+8, 24)
+                  b[dylinker_off+24:dylinker_off+24+len(short_name)]=short_name
+              else:
+                  raise SystemExit('Sem espaço para LC_ID_DYLIB')
           open(p,'wb').write(b)
           PY
 
