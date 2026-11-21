@@ -59,15 +59,34 @@ jobs:
           if struct.unpack_from('<I', b, 0)[0] != 0xfeedfacf:
               raise SystemExit('Inter não é Mach-O arm64 esperado')
           struct.pack_into('<I', b, 12, 0x6) # MH_DYLIB
+          flags=struct.unpack_from('<I', b, 24)[0]
+          struct.pack_into('<I', b, 24, flags & ~0x200000) # clear MH_PIE
           ncmds, sizeofcmds = struct.unpack_from('<II', b, 16)
           off=32
+          text_fileoff=None
+          has_id=False
           for _ in range(ncmds):
               cmd, cmdsize = struct.unpack_from('<II', b, off)
               if cmd == 0x19: # LC_SEGMENT_64
-                  name=b[off+8:off+24].split(b'\\0',1)[0]
+                  name=b[off+8:off+24].split(b'\0',1)[0]
                   if name == b'__PAGEZERO':
                       struct.pack_into('<QQ', b, off+24, 0x100000000-0x4000, 0x4000)
+                  if name == b'__TEXT':
+                      text_fileoff=struct.unpack_from('<Q', b, off+40)[0]
+              if cmd == 0xd: # LC_ID_DYLIB
+                  has_id=True
               off += cmdsize
+          if not has_id:
+              name=b'InterGuest/3105\0'
+              cmdsize=(24+len(name)+7)&~7
+              if text_fileoff is None or 32+sizeofcmds+cmdsize > text_fileoff:
+                  raise SystemExit('Sem espaço para LC_ID_DYLIB')
+              insert=32+sizeofcmds
+              struct.pack_into('<II', b, insert, 0xd, cmdsize)
+              struct.pack_into('<I', b, insert+8, 24)
+              b[insert+24:insert+24+len(name)]=name
+              struct.pack_into('<I', b, 16, ncmds+1)
+              struct.pack_into('<I', b, 20, sizeofcmds+cmdsize)
           open(p,'wb').write(b)
           PY
 
