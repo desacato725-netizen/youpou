@@ -1,0 +1,73 @@
+name: Integração autorizada com app parceiro
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_url:
+        description: URL pública da página da IPA autorizada
+        required: true
+        default: https://www.mediafire.com/file/5fg7m86oicjzcet/EeveeSpotify-9.1.0-patched.ipa/file
+        type: string
+  push:
+    paths:
+      - 'partner-link/PartnerLink.m'
+      - '.github/workflows/partner-link.yml'
+
+jobs:
+  inject-partner:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Baixar IPA autorizada
+        env:
+          SOURCE_URL: ${{ inputs.source_url || 'https://www.mediafire.com/file/5fg7m86oicjzcet/EeveeSpotify-9.1.0-patched.ipa/file' }}
+        run: |
+          python3 - <<'PY'
+          import os, re, urllib.request
+          page = urllib.request.urlopen(os.environ['SOURCE_URL']).read().decode('utf-8', 'ignore')
+          matches = re.findall(r'https://download[^" ]+', page)
+          if not matches:
+              raise SystemExit('Não foi possível localizar o download direto da IPA')
+          url = matches[0].replace('&amp;', '&')
+          urllib.request.urlretrieve(url, '/tmp/partner.ipa')
+          PY
+          test -s /tmp/partner.ipa
+
+      - name: Instalar ferramenta insert_dylib
+        run: |
+          git clone --depth 1 https://github.com/tyilo/insert_dylib.git /tmp/insert_dylib
+          cd /tmp/insert_dylib
+          xcodebuild -project insert_dylib.xcodeproj -scheme insert_dylib -configuration Release -sdk macosx SYMROOT=/tmp/insert-build CODE_SIGNING_ALLOWED=NO
+          cp /tmp/insert-build/Release/insert_dylib /usr/local/bin/insert_dylib
+          chmod +x /usr/local/bin/insert_dylib
+
+      - name: Compilar dylib de integração
+        run: |
+          xcrun --sdk iphoneos clang -dynamiclib -fobjc-arc -framework UIKit -framework Foundation \
+            -miphoneos-version-min=16.0 partner-link/PartnerLink.m \
+            -o /tmp/PartnerLink.dylib
+
+      - name: Preparar cópia do app parceiro
+        run: |
+          rm -rf /tmp/partner
+          mkdir -p /tmp/partner
+          unzip -q /tmp/partner.ipa -d /tmp/partner
+          APP=$(find /tmp/partner/Payload -maxdepth 1 -name '*.app' -type d | head -1)
+          test -n "$APP"
+          cp /tmp/PartnerLink.dylib "$APP/PartnerLink.dylib"
+          insert_dylib --inplace --strip-codesig --all-yes \
+            '@executable_path/PartnerLink.dylib' "$APP/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist")"
+          codesign --force --deep --sign - "$APP"
+          mkdir -p out/Payload
+          cp -R "$APP" out/Payload/
+          cd out && zip -qry ../Spotify-partner-inter-link.ipa Payload
+
+      - name: Enviar IPA parceira experimental
+        uses: actions/upload-artifact@v4
+        with:
+          name: spotify-partner-inter-link
+          path: Spotify-partner-inter-link.ipa
+          if-no-files-found: error

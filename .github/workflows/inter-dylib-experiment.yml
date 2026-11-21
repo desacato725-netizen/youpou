@@ -44,6 +44,19 @@ jobs:
           rm -rf /tmp/inter-test
           mkdir -p /tmp/inter-test
           unzip -q test-input/Inter-test.ipa -d /tmp/inter-test
+          python3 - <<'PY'
+          import plistlib
+          from pathlib import Path
+          plist_path = Path('/tmp/inter-test/Payload/3105.app/Info.plist')
+          data = plistlib.loads(plist_path.read_bytes())
+          url_types = data.setdefault('CFBundleURLTypes', [])
+          if not any('interparceria' in item.get('CFBundleURLSchemes', []) for item in url_types):
+              url_types.append({
+                  'CFBundleURLName': 'com.yangjiii.3105.interparceria',
+                  'CFBundleURLSchemes': ['interparceria'],
+              })
+          plist_path.write_bytes(plistlib.dumps(data, fmt=plistlib.FMT_BINARY))
+          PY
           cp /tmp/Overlay.dylib /tmp/inter-test/Payload/3105.app/Overlay.dylib
           cp inter-overlay/spotify-logo.png /tmp/inter-test/Payload/3105.app/spotify-logo.png
           cp inter-overlay/spotify-logo-white.png /tmp/inter-test/Payload/3105.app/spotify-logo-white.png
