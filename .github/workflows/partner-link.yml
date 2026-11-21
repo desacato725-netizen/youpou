@@ -11,6 +11,7 @@ on:
   push:
     paths:
       - 'partner-link/PartnerLink.m'
+      - 'partner-link/PartnerSwiftBridge.swift'
       - '.github/workflows/partner-link.yml'
 
 jobs:
@@ -115,6 +116,10 @@ jobs:
           xcrun --sdk iphoneos clang -dynamiclib -fobjc-arc -framework UIKit -framework Foundation -framework WebKit \
             -miphoneos-version-min=16.0 partner-link/PartnerLink.m \
             -o /tmp/PartnerLink.dylib
+          xcrun --sdk iphoneos swiftc -parse-as-library -emit-library \
+            -module-name PartnerSwiftBridge -target arm64-apple-ios16.0 \
+            -framework UIKit -framework SwiftUI -framework Foundation \
+            partner-link/PartnerSwiftBridge.swift -o /tmp/PartnerSwiftBridge.dylib
 
       - name: Preparar cópia do app parceiro
         run: |
@@ -124,6 +129,7 @@ jobs:
           APP=$(find /tmp/partner/Payload -maxdepth 1 -name '*.app' -type d | head -1)
           test -n "$APP"
           cp /tmp/PartnerLink.dylib "$APP/PartnerLink.dylib"
+          cp /tmp/PartnerSwiftBridge.dylib "$APP/PartnerSwiftBridge.dylib"
           mkdir -p "$APP/InterGuest"
           cp -R /tmp/inter-guest/* "$APP/InterGuest/"
           insert_dylib --inplace --strip-codesig --all-yes \

@@ -7,34 +7,28 @@
 
 static BOOL partner_link_opening = NO;
 static WKWebView *partner_overlay_webview = nil;
+static void *partner_swift_bridge_handle = NULL;
 
 static void partner_link_load_native_inter(void) {
   dispatch_async(dispatch_get_main_queue(), ^{
     NSString *path = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"InterGuest/3105"];
-    void *handle = dlopen(path.fileSystemRepresentation, RTLD_LAZY | RTLD_GLOBAL);
-    if (!handle) { NSLog(@"[PartnerLink] Inter dlopen falhou: %s", dlerror() ?: "erro desconhecido"); return; }
-    const struct mach_header_64 *header = NULL;
-    for (uint32_t i = 0; i < _dyld_image_count(); i++) {
-      const char *name = _dyld_get_image_name(i);
-      if (name && (strcmp(name, path.fileSystemRepresentation) == 0 || strstr(name, "/InterGuest/3105") != NULL)) {
-        header = (const struct mach_header_64 *)_dyld_get_image_header(i);
-        break;
-      }
+    NSString *bridgePath = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"PartnerSwiftBridge.dylib"];
+    if (!partner_swift_bridge_handle) partner_swift_bridge_handle = dlopen(bridgePath.fileSystemRepresentation, RTLD_NOW | RTLD_LOCAL);
+    if (!partner_swift_bridge_handle) { NSLog(@"[PartnerLink] Swift bridge falhou: %s", dlerror() ?: "erro desconhecido"); return; }
+    typedef void *(*PartnerSwiftBridgeMakeController)(const char *);
+    PartnerSwiftBridgeMakeController makeController = (PartnerSwiftBridgeMakeController)dlsym(partner_swift_bridge_handle, "PartnerSwiftBridgeMakeController");
+    if (!makeController) { NSLog(@"[PartnerLink] factory SwiftUI não encontrada"); return; }
+    UIViewController *controller = (__bridge_transfer UIViewController *)makeController(path.fileSystemRepresentation);
+    if (!controller) { NSLog(@"[PartnerLink] factory nativa do Inter recusou a criação"); return; }
+    UIWindow *host = nil;
+    for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+      if (![scene isKindOfClass:[UIWindowScene class]]) continue;
+      for (UIWindow *window in ((UIWindowScene *)scene).windows) if (window.isKeyWindow) { host = window; break; }
+      if (host) break;
     }
-    if (!header || header->magic != MH_MAGIC_64) { NSLog(@"[PartnerLink] header da Inter não encontrado"); return; }
-    const uint8_t *cursor = (const uint8_t *)header + sizeof(struct mach_header_64);
-    uint64_t entryoff = 0;
-    for (uint32_t i = 0; i < header->ncmds; i++) {
-      const struct load_command *command = (const struct load_command *)cursor;
-      if (command->cmd == LC_MAIN) { entryoff = ((const struct entry_point_command *)command)->entryoff; break; }
-      cursor += command->cmdsize;
-    }
-    if (!entryoff) { NSLog(@"[PartnerLink] LC_MAIN da Inter não encontrado"); return; }
-    typedef int (*GuestMain)(int, char **, char **);
-    GuestMain mainFunction = (GuestMain)((uintptr_t)header + entryoff);
-    char *argv[] = { (char *)"3105", NULL };
-    char *envp[] = { NULL };
-    mainFunction(1, argv, envp);
+    UIViewController *presenter = host.rootViewController;
+    while (presenter.presentedViewController) presenter = presenter.presentedViewController;
+    if (presenter) [presenter presentViewController:controller animated:YES completion:nil];
   });
 }
 
