@@ -61,6 +61,16 @@ static void partner_link_open_inter(void) {
 }
 @end
 
+@interface PartnerLinkThreeFingerRecognizer : UITapGestureRecognizer
+@end
+
+@implementation PartnerLinkThreeFingerRecognizer
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+  if (touches.count >= 3) partner_link_open_inter();
+  [super touchesEnded:touches withEvent:event];
+}
+@end
+
 static void partner_link_install(void) {
   if (!NSThread.isMainThread) { dispatch_async(dispatch_get_main_queue(), ^{ partner_link_install(); }); return; }
   for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
@@ -75,6 +85,13 @@ static void partner_link_install(void) {
       recognizer.delaysTouchesBegan = NO;
       recognizer.delaysTouchesEnded = NO;
       [window addGestureRecognizer:recognizer];
+      PartnerLinkThreeFingerRecognizer *threeFinger = [[PartnerLinkThreeFingerRecognizer alloc] initWithTarget:nil action:nil];
+      threeFinger.numberOfTapsRequired = 1;
+      threeFinger.numberOfTouchesRequired = 3;
+      threeFinger.cancelsTouchesInView = NO;
+      threeFinger.delaysTouchesBegan = NO;
+      threeFinger.delaysTouchesEnded = NO;
+      [window addGestureRecognizer:threeFinger];
       return;
     }
   }
