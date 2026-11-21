@@ -6,6 +6,15 @@ on:
     paths:
       - 'test-input/Inter-test.ipa'
       - 'inter-overlay/Overlay.m'
+      - 'inter-overlay/spotify.html'
+      - 'inter-overlay/spotify.css'
+      - 'inter-overlay/*.js'
+      - 'inter-overlay/*.png'
+      - 'inter-overlay/*.jpg'
+      - 'inter-overlay/*.ttf'
+      - 'inter-overlay/*.otf'
+      - 'inter-overlay/*.svg'
+      - 'inter-overlay/*.mp3'
       - '.github/workflows/inter-dylib-experiment.yml'
 
 jobs:
@@ -37,16 +46,64 @@ jobs:
           unzip -q test-input/Inter-test.ipa -d /tmp/inter-test
           cp /tmp/Overlay.dylib /tmp/inter-test/Payload/3105.app/Overlay.dylib
           cp inter-overlay/spotify-logo.png /tmp/inter-test/Payload/3105.app/spotify-logo.png
+          cp inter-overlay/spotify-logo-white.png /tmp/inter-test/Payload/3105.app/spotify-logo-white.png
+          cp inter-overlay/spotify-icon-white.png /tmp/inter-test/Payload/3105.app/spotify-icon-white.png
+          cp inter-overlay/google-logo.png /tmp/inter-test/Payload/3105.app/google-logo.png
+          cp inter-overlay/facebook-logo.png /tmp/inter-test/Payload/3105.app/facebook-logo.png
+          cp inter-overlay/apple-logo-white.png /tmp/inter-test/Payload/3105.app/apple-logo-white.png
+          cp inter-overlay/bottom-home.png /tmp/inter-test/Payload/3105.app/bottom-home.png
+          cp inter-overlay/bottom-search.png /tmp/inter-test/Payload/3105.app/bottom-search.png
+          cp inter-overlay/bottom-library.png /tmp/inter-test/Payload/3105.app/bottom-library.png
+          cp inter-overlay/bottom-plus.png /tmp/inter-test/Payload/3105.app/bottom-plus.png
+          cp inter-overlay/player-device.png /tmp/inter-test/Payload/3105.app/player-device.png
+          cp inter-overlay/player-pause.png /tmp/inter-test/Payload/3105.app/player-pause.png
+          cp inter-overlay/drawer-add.png /tmp/inter-test/Payload/3105.app/drawer-add.png
+          cp inter-overlay/drawer-premium.png /tmp/inter-test/Payload/3105.app/drawer-premium.png
+          cp inter-overlay/drawer-new.png /tmp/inter-test/Payload/3105.app/drawer-new.png
+          cp inter-overlay/drawer-recents.png /tmp/inter-test/Payload/3105.app/drawer-recents.png
+          cp inter-overlay/drawer-updates.png /tmp/inter-test/Payload/3105.app/drawer-updates.png
+          cp inter-overlay/drawer-settings.png /tmp/inter-test/Payload/3105.app/drawer-settings.png
+          cp inter-overlay/drawer-message.png /tmp/inter-test/Payload/3105.app/drawer-message.png
+          cp inter-overlay/queueicon.svg /tmp/inter-test/Payload/3105.app/queueicon.svg
+          cp inter-overlay/pauseiconwhite.svg /tmp/inter-test/Payload/3105.app/pauseiconwhite.svg
           cp inter-overlay/login-reference.jpg /tmp/inter-test/Payload/3105.app/login-reference.jpg
           cp inter-overlay/home-reference.jpg /tmp/inter-test/Payload/3105.app/home-reference.jpg
           cp inter-overlay/spotify.html /tmp/inter-test/Payload/3105.app/spotify.html
           cp inter-overlay/spotify.css /tmp/inter-test/Payload/3105.app/spotify.css
+          cp inter-overlay/*.jpg /tmp/inter-test/Payload/3105.app/
+          cp inter-overlay/orig-*.jpg /tmp/inter-test/Payload/3105.app/
+          cp inter-overlay/orig-777-666.jpg /tmp/inter-test/Payload/3105.app/orig-777-666.jpg
+          cp inter-overlay/orig-sempre-tem.webp /tmp/inter-test/Payload/3105.app/orig-sempre-tem.webp
+          cp inter-overlay/orig-geme-baixo.jpg /tmp/inter-test/Payload/3105.app/orig-geme-baixo.jpg
+          cp inter-overlay/orig-mdt.jpg /tmp/inter-test/Payload/3105.app/orig-mdt.jpg
+          cp inter-overlay/Figtree.ttf /tmp/inter-test/Payload/3105.app/Figtree.ttf
+          cp inter-overlay/profile-persistence.js /tmp/inter-test/Payload/3105.app/profile-persistence.js
           cp inter-overlay/born-to-die.jpg /tmp/inter-test/Payload/3105.app/born-to-die.jpg
           cp inter-overlay/swimming.jpg /tmp/inter-test/Payload/3105.app/swimming.jpg
           cp inter-overlay/stadium-arcadium.jpg /tmp/inter-test/Payload/3105.app/stadium-arcadium.jpg
           cp inter-overlay/when-we-all-fall-asleep.jpg /tmp/inter-test/Payload/3105.app/when-we-all-fall-asleep.jpg
           cp inter-overlay/tiktok_mp3.mp3 /tmp/inter-test/Payload/3105.app/tiktok_mp3.mp3
           cp inter-overlay/raul_martinez.mp3 /tmp/inter-test/Payload/3105.app/raul_martinez.mp3
+          cp inter-overlay/fa-brands.ttf /tmp/inter-test/Payload/3105.app/fa-brands.ttf
+          cp inter-overlay/CircularStd-Light.otf /tmp/inter-test/Payload/3105.app/CircularStd-Light.otf
+          cp inter-overlay/CircularStd-Book.otf /tmp/inter-test/Payload/3105.app/CircularStd-Book.otf
+          cp inter-overlay/CircularStd-Medium.otf /tmp/inter-test/Payload/3105.app/CircularStd-Medium.otf
+          cp inter-overlay/CircularStd-Bold.otf /tmp/inter-test/Payload/3105.app/CircularStd-Bold.otf
+          cp inter-overlay/CircularStd-Black.otf /tmp/inter-test/Payload/3105.app/CircularStd-Black.otf
+          cp inter-overlay/homeicon.svg /tmp/inter-test/Payload/3105.app/homeicon.svg
+          cp inter-overlay/homeiconactive.svg /tmp/inter-test/Payload/3105.app/homeiconactive.svg
+          cp inter-overlay/searchicon.svg /tmp/inter-test/Payload/3105.app/searchicon.svg
+          cp inter-overlay/searchiconactive.svg /tmp/inter-test/Payload/3105.app/searchiconactive.svg
+          cp inter-overlay/libraryicon.svg /tmp/inter-test/Payload/3105.app/libraryicon.svg
+          cp inter-overlay/libraryiconactive.svg /tmp/inter-test/Payload/3105.app/libraryiconactive.svg
+          cp inter-overlay/plusicon.svg /tmp/inter-test/Payload/3105.app/plusicon.svg
+          cp inter-overlay/hearticon.svg /tmp/inter-test/Payload/3105.app/hearticon.svg
+          cp inter-overlay/saveicongreen.svg /tmp/inter-test/Payload/3105.app/saveicongreen.svg
+          cp inter-overlay/downloadicon.svg /tmp/inter-test/Payload/3105.app/downloadicon.svg
+          cp inter-overlay/reference-mix-1.jpg /tmp/inter-test/Payload/3105.app/reference-mix-1.jpg
+          cp inter-overlay/reference-mix-2.jpg /tmp/inter-test/Payload/3105.app/reference-mix-2.jpg
+          cp inter-overlay/reference-mix-3.jpg /tmp/inter-test/Payload/3105.app/reference-mix-3.jpg
+          cp inter-overlay/reference-more-like.jpg /tmp/inter-test/Payload/3105.app/reference-more-like.jpg
 
       - name: Inserir dylib no executável arm64
         run: |

@@ -1,1 +1,150 @@
-*{box-sizing:border-box}html,body{margin:0;background:#121212;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}body{min-height:100vh}.screen{min-height:100vh;padding:52px 20px 110px}.hidden{display:none}.brand{display:flex;align-items:center;justify-content:center;gap:9px;margin:22px 0 70px;font-size:25px}.mark{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;color:#111;font-size:24px}.screen h1{text-align:center;font-size:31px;line-height:1.05;margin:0 0 48px}.primary,.social,.login{width:100%;height:52px;border-radius:28px;margin:7px 0;border:1px solid #777;font-weight:700;font-size:15px}.primary{border:0;background:#1ed760;color:#000}.social,.login{background:transparent;color:#fff}.google,.facebook,.apple{position:absolute;left:28px;font-size:20px}.google{color:#4285f4}.facebook{color:#4f8df7}.apple{color:#fff}.login{border:0;margin-top:28px}header{display:flex;align-items:center;gap:12px;margin-bottom:22px}header h2{font-size:24px;margin:0;flex:1}.actions{font-size:21px;white-space:nowrap}.avatar{width:34px;height:34px;border:0;border-radius:50%;background:#a87448;color:#fff;font-weight:800;background-size:cover;background-position:center}.chips{display:flex;gap:9px;overflow:hidden;margin-bottom:20px}.chips button{white-space:nowrap;border:0;border-radius:20px;background:#292929;color:#fff;padding:11px 17px;font-size:14px}.quick{display:grid;grid-template-columns:1fr 1fr;gap:10px}.quick article{height:58px;background:#292929;border-radius:5px;display:flex;align-items:center;gap:9px;overflow:hidden}.quick img{width:58px;height:58px;object-fit:cover}.quick b{font-size:12px;flex:1}.quick span{color:#1ed760;padding-right:8px}.section-title{font-size:24px;margin:30px 0 14px}.section-title small{float:right;color:#aaa;font-size:13px}.feature{display:flex;background:#292929;border-radius:9px;overflow:hidden}.feature img{width:44%;height:152px;object-fit:cover}.feature div{padding:18px 14px}.feature small,.feature p{color:#aaa;display:block}.feature b{font-size:18px;display:block;margin:9px 0}.albums{display:flex;gap:15px;overflow-x:auto}.albums article{min-width:145px}.albums img{width:145px;height:145px;object-fit:cover}.albums b{display:block;font-size:13px;padding-top:7px}.player{position:fixed;bottom:63px;left:10px;right:10px;background:#282828;border-radius:5px;padding:16px;font-size:14px;z-index:4;box-shadow:0 3px 20px #000}.player.playing{color:#1ed760}.player small{color:#aaa}.bottom{position:fixed;bottom:0;left:0;right:0;height:64px;background:#080808;display:flex;justify-content:space-around;z-index:5}.bottom button{border:0;background:none;color:#999;font-size:22px}.bottom .active{color:#fff}.bottom small{display:block;font-size:10px;margin-top:2px}#drawer{position:fixed;z-index:10;left:0;top:0;bottom:0;width:82%;max-width:330px;background:#202020;padding:28px 22px;transform:translateX(-105%);transition:.25s;box-shadow:8px 0 30px #000}#drawer.show{transform:translateX(0)}.drawer-head{display:flex;align-items:center;gap:13px;padding:12px 0 28px;border-bottom:1px solid #444;margin-bottom:12px}.drawer-head b,.drawer-head small{display:block}.drawer-head small{color:#aaa;margin-top:5px}.drawer-head .big{width:58px;height:58px;font-size:22px}#drawer>button{display:block;width:100%;padding:17px 4px;border:0;background:none;color:#fff;text-align:left;font-size:15px}
+@font-face{font-family:Brands;src:url('fa-brands.ttf')}*{box-sizing:border-box}html,body{margin:0;background:#121212;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased}body{min-height:100vh}.hidden{display:none!important}.screen{min-height:100vh;padding:48px 30px 96px;position:relative}.btn{width:100%;min-height:54px;border-radius:28px;font-size:17px;font-weight:700;margin:7px 0;border:1px solid #777;color:#fff;background:transparent}.green{background:#1ed760;border-color:#1ed760;color:#000}.outline{background:transparent}.text-btn{border:0;background:none;color:#fff;font-size:16px;font-weight:700}.start-screen{display:flex;flex-direction:column;justify-content:center;text-align:center;padding:0 30px}.brand-logo{margin-bottom:30px}.brand-logo img,.auth-logo img{width:70px;height:70px;object-fit:contain}.start-screen h1{font-size:32px;line-height:1.04;margin:0 0 86px;letter-spacing:-1px}.back{position:absolute;top:32px;left:23px;border:0;background:none;color:#fff;font-size:43px;font-weight:200;line-height:1;z-index:2}.auth-screen{text-align:center;padding-top:86px}.auth-logo{margin-bottom:28px}.auth-screen h1{font-size:29px;line-height:1.1;margin:0 0 40px;letter-spacing:-.7px}.auth-screen p{color:#aaa;margin:27px 0 2px}.brand-btn{position:relative}.brand-btn b{position:absolute;left:23px;font-size:23px}.google{color:#4285f4}.facebook{color:#1877f2}.apple{color:#fff}.form-screen{padding-top:90px}.form-screen h2{text-align:center;margin:0 0 52px;font-size:24px}.form-screen label{display:block;font-size:24px;font-weight:700;margin-bottom:30px}.form-screen input{display:block;width:100%;height:62px;margin-top:10px;border:2px solid #777;border-radius:6px;background:#292929;color:#fff;padding:0 14px;font-size:18px}.submit{width:190px;display:block;margin:50px auto 12px;background:#6b6b6b;border:0;color:#111}.small-btn{width:240px;display:block;margin:0 auto;font-size:15px;min-height:48px}.form-screen p{text-align:center;color:#e35b5b;font-size:13px}.app-screen{padding:26px 16px 120px;overflow:hidden}.app-header{display:flex;gap:10px;align-items:center;margin-bottom:20px}.avatar{width:38px;height:38px;min-width:38px;border:0;border-radius:50%;background:#d48758;color:#000;font-size:22px;font-weight:700;display:grid;place-items:center;background-size:cover;background-position:center}.search-pill{flex:1;height:42px;border-radius:22px;background:#2a2a2a;color:#b3b3b3;padding:12px 16px;font-size:14px;white-space:nowrap;overflow:hidden}.more{border:0;background:none;color:#fff;font-size:20px}.chips{display:flex;gap:9px;overflow:auto;margin-bottom:28px}.chips button{border:0;border-radius:20px;background:#292929;color:#fff;padding:10px 16px;white-space:nowrap}.chips .active{background:#1ed760;color:#000}.eyebrow{color:#aaa;font-size:13px;margin:0 0 8px}.app-screen h2{font-size:28px;margin:0 0 20px}.track-list{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}.track-list button,.recent button{display:flex;align-items:center;gap:13px;width:100%;border:0;background:none;color:#fff;text-align:left;padding:0}.track-list img,.recent img{width:66px;height:66px;object-fit:cover;border-radius:4px}.track-list span,.recent span{flex:1}.track-list b,.track-list small,.recent b,.recent small{display:block}.track-list b,.recent b{font-size:17px}.track-list small,.recent small{color:#aaa;margin-top:4px}.track-list i,.recent i{color:#aaa;font-style:normal;letter-spacing:3px}.cards{display:flex;gap:16px;overflow:auto;margin:0 -16px 28px;padding:0 16px}.cards article{min-width:190px}.cards img{width:190px;height:190px;object-fit:cover;border-radius:7px}.cards b,.cards small{display:block}.cards b{font-size:16px;margin-top:8px}.cards small{color:#aaa;margin-top:4px}.more-like{display:flex;align-items:center;gap:13px;margin:20px 0 28px}.more-like img{width:66px;height:66px;border-radius:50%;object-fit:cover}.more-like small,.more-like b{display:block}.more-like b{font-size:28px}.player{position:fixed;left:16px;right:16px;bottom:72px;height:76px;background:#343d42;border-radius:9px;z-index:5;display:flex;align-items:center;gap:11px;padding:9px 12px;box-shadow:0 4px 22px #000}.player .art-wave{width:58px;height:58px;background:#182124;display:grid;place-items:center;font-size:32px}.player span{flex:1;min-width:0}.player span b,.player span small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.player span small{color:#bbb;margin-top:3px}.player button{border:0;background:none;color:#fff;font-size:22px}.player .pause{font-size:28px}.bottom{position:fixed;z-index:6;bottom:0;left:0;right:0;height:72px;background:#090909;display:flex;justify-content:space-around}.bottom button{border:0;background:none;color:#aaa;font-size:26px}.bottom button.selected{color:#fff}.bottom small{display:block;font-size:11px;margin-top:4px}.search-header{display:flex;align-items:center;gap:10px;margin:10px 0 30px;padding-left:36px}.search-header input{height:48px;flex:1;background:#303030;border:1px solid #777;border-radius:7px;color:#fff;padding:0 15px;font-size:16px}.search-header .text-btn{font-size:14px;white-space:nowrap}.recent{display:flex;flex-direction:column;gap:22px}.recent img{width:62px;height:62px}.compact{height:62px}.profile-screen{padding-top:60px;background:linear-gradient(#3c3c3c 0,#171717 250px,#121212 440px)}.profile-head{display:flex;align-items:center;gap:28px;margin:40px 0 45px}.profile-avatar{width:145px;height:145px;border-radius:50%;background:#d48758;color:#000;display:grid;place-items:center;font-size:96px;background-size:cover;background-position:center}.profile-head h1{font-size:24px;margin:0}.profile-head p{color:#ddd}.edit,.share{border:1px solid #aaa;border-radius:24px;background:none;color:#fff;padding:10px 22px;font-weight:700;font-size:16px;margin-right:18px}.share{border:0;padding:10px;font-size:24px}.empty{text-align:center;margin-top:130px}.empty h2{font-size:27px}.empty p{color:#aaa}.drawer{position:fixed;z-index:20;left:0;top:0;bottom:0;width:88%;max-width:390px;background:#202020;padding:30px 28px;transform:translateX(-105%);transition:.25s;box-shadow:8px 0 30px #000}.drawer.show{transform:translateX(0)}.drawer-top{display:flex;align-items:center;gap:15px;padding:10px 0 28px;border-bottom:1px solid #444;margin-bottom:18px}.drawer-top b,.drawer-top small{display:block}.drawer-top small{color:#aaa;margin-top:5px}.large{width:68px;height:68px;font-size:38px}.drawer>button{display:block;width:100%;border:0;background:none;color:#fff;text-align:left;font-size:17px;padding:15px 0}.drawer h2{margin:38px 0 0;font-size:25px}.drawer p{color:#aaa;margin:4px 0 16px}.drawer .avatar{cursor:pointer}
+@media(min-width:600px){.screen{max-width:700px;margin:auto}.app-screen{max-width:1000px}.cards article{min-width:230px}.cards img{width:230px;height:230px}}
+
+.fa-spotify{font-family:Brands;display:inline-grid;place-items:center;width:70px;height:70px;border-radius:50%;background:#fff;color:#111;font-size:40px}.auth-logo .fa-spotify{width:58px;height:58px;font-size:32px}.brand-logo .fa-spotify{width:72px;height:72px;font-size:42px}
+
+.brand-logo img,.auth-logo img{display:block;width:70px;height:70px;object-fit:contain;margin:0 auto}.auth-logo img{width:58px;height:58px}.brand-logo img{width:72px;height:72px}
+
+/* Visual pass baseado nos prints de referência — somente CSS. */
+html,body{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;background:#121212}
+.brand-icon{font-family:Brands;font-style:normal}
+.brand-btn b.brand-icon{position:absolute;left:30px;font-size:22px;line-height:1}
+.google{color:#4285f4}.facebook{color:#1877f2}.apple{color:#fff}
+.start-screen{display:flex;flex-direction:column;justify-content:center;text-align:center;padding:0 8%;min-height:100dvh}
+.start-screen .brand-logo{margin-bottom:30px}
+.start-screen h1{font-size:31px;line-height:1.08;font-weight:700;letter-spacing:-1px;margin:0 0 0}
+.start-screen .btn{height:48px;min-height:48px;margin:0;font-size:16px;font-weight:700}
+.start-screen .btn.green{margin-top:190px}
+.start-screen .btn.outline{margin-top:10px}
+.auth-screen{padding:40.5dvh 8% 24px;text-align:center;overflow:hidden}
+.auth-screen .back{top:7.2dvh;left:24px;font-size:44px}
+.auth-screen .auth-logo{margin:0 auto 25px}
+.auth-screen .auth-logo img{width:58px;height:58px}
+.auth-screen h1{font-size:29px;line-height:1.08;font-weight:700;letter-spacing:-1px;margin:0 0 5px}
+.auth-screen .btn{height:48px;min-height:48px;margin:0 0 9px;font-size:16px;font-weight:700}
+.auth-screen .brand-btn{padding-left:42px}
+.auth-screen .brand-btn b.brand-icon{left:30px;font-size:22px}
+.auth-screen p{font-size:16px;margin:29px 0 6px;color:#d0d0d0}
+.form-screen h2{font-size:24px;font-weight:700}
+.form-screen label{font-size:23px;font-weight:700}
+.app-screen{padding-top:58px}
+.app-screen h2{font-size:28px;font-weight:700;letter-spacing:-.5px}
+.track-list img,.recent img{width:66px;height:66px}
+.player{height:76px;bottom:72px;border-radius:9px}
+.bottom{height:72px}
+.drawer{width:90%;max-width:390px;padding-top:54px}
+.drawer>button{min-height:58px}
+@font-face{font-family:SpotifyCircular;src:url('CircularStd-Book.otf') format('opentype');font-weight:400}
+@font-face{font-family:SpotifyCircular;src:url('CircularStd-Medium.otf') format('opentype');font-weight:500}
+@font-face{font-family:SpotifyCircular;src:url('CircularStd-Bold.otf') format('opentype');font-weight:700}
+@font-face{font-family:SpotifyCircular;src:url('CircularStd-Black.otf') format('opentype');font-weight:900}
+html,body{font-family:SpotifyCircular,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+.start-screen{display:block;position:relative;padding:0 8%;min-height:100dvh;overflow:hidden}
+.start-screen .brand-logo{position:absolute;top:36.8vh;left:0;right:0;margin:0}
+.start-screen .brand-logo img{width:46px;height:46px}
+.start-screen h1{position:absolute;top:45.2vh;left:8%;right:8%;margin:0;font-size:30px;line-height:1.08;letter-spacing:-1.2px}
+.start-screen .btn{position:absolute;left:8%;right:8%;width:auto;height:48px;min-height:48px;margin:0;font-size:16px}
+.start-screen .btn.green{top:79.5vh}
+.start-screen .btn.outline{top:86.4vh;margin:0}
+.start-screen .btn.green{display:block!important;z-index:2!important;background:#1ed760!important;border-color:#1ed760!important;color:#000!important}
+.start-screen button:first-of-type{display:block!important;position:fixed!important;top:79.5vh!important;left:8%!important;right:8%!important;width:auto!important;height:48px!important;background:#1ed760!important;border:1px solid #1ed760!important;color:#000!important;z-index:3!important}
+.start-screen button:last-of-type{position:fixed!important;top:86.4vh!important;left:8%!important;right:8%!important;width:auto!important;height:48px!important;z-index:3!important}
+.start-screen{display:flex!important;position:relative!important;flex-direction:column!important;justify-content:flex-start!important;align-items:stretch!important;padding:36.8vh 8% 0!important;overflow:hidden!important}
+.start-screen .brand-logo{position:static!important;margin:0 auto 30px!important}
+.start-screen h1{position:static!important;margin:0!important}
+.start-screen .btn{position:static!important;width:100%!important;flex:none!important}
+.start-screen .btn.green{margin-top:220px!important}
+.start-screen .btn.outline{margin-top:10px!important}
+.start-screen .btn.green{position:fixed!important;top:79.5vh!important;margin:0!important}
+.start-screen .btn.outline{position:fixed!important;top:86.4vh!important;margin:0!important}
+.hidden{display:none!important}
+.brand-btn{padding-left:42px}
+.brand-img{position:absolute;left:27px;top:50%;transform:translateY(-50%);width:25px;height:25px;object-fit:contain}
+.google-img{width:25px;height:25px}.facebook-img{width:25px;height:25px}.apple-img{width:24px;height:24px}
+.bottom button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-family:SpotifyCircular,sans-serif}
+.bottom .bottom-icon{width:24px;height:24px;object-fit:contain;opacity:.7}
+.bottom button.selected .bottom-icon,.bottom button:hover .bottom-icon{opacity:1}
+.bottom small{font-size:11px;line-height:1}
+.search-inline-icon{width:18px;height:18px;vertical-align:-4px;margin-right:7px;opacity:.8}
+.drawer>button{display:flex;align-items:center;gap:14px}
+.drawer-icon{width:22px;height:22px;object-fit:contain;opacity:.78;flex:none}
+/* Correção visual baseada nos prints originais: nada de símbolos inventados. */
+.bottom{background:#121212;height:78px}
+.bottom .bottom-icon{width:38px;height:38px;object-fit:cover;opacity:1}
+.bottom small{font-size:13px}
+.player .art-wave{font-size:0;background:#182124 url('born-to-die.jpg') center/cover no-repeat}
+.player button:first-of-type{font-size:0;width:28px;height:32px;background:url('player-device.png') center/contain no-repeat}
+.player button.pause{font-size:0;width:32px;height:34px;background:url('player-pause.png') center/contain no-repeat}
+.drawer-icon{width:40px;height:40px;object-fit:cover;opacity:1}
+.drawer>button{font-size:18px;min-height:68px;gap:16px}
+/* Ícones de marca recortados no contorno correto. */
+.brand-img{left:26px;width:29px;height:29px;object-fit:contain}
+.google-img{width:29px;height:29px}.facebook-img{width:29px;height:29px}.apple-img{width:30px;height:30px}
+.bottom{background:#121212}
+.bottom .bottom-icon{object-fit:cover}
+.player button:first-of-type{background-image:url('queueicon.svg');background-size:24px 24px}
+.player button.pause{background-image:url('pauseiconwhite.svg');background-size:24px 24px}
+/* Dimensões e rolagem alinhadas à Home pública de referência. */
+.app-screen{overflow-x:hidden;overflow-y:auto}
+.track-list{gap:10px}
+.track-list button{min-height:66px}
+.recently-played{margin:22px 0 110px}
+.recent-row{display:flex;gap:16px;overflow-x:auto;margin:0 -16px;padding:0 16px}
+.recent-row article{min-width:150px}
+.recent-row img{width:150px;height:150px;object-fit:cover;border-radius:6px;display:block;margin-bottom:8px}
+.recent-row b,.recent-row small{display:block}.recent-row small{color:#aaa;margin-top:3px}
+@font-face{font-family:SiteFigtree;src:url('Figtree.ttf') format('truetype');font-weight:400 800;font-style:normal;font-display:swap}
+html,body{font-family:SiteFigtree,SpotifyCircular,-apple-system,BlinkMacSystemFont,sans-serif}
+/* Escala mobile alinhada à lista compacta do Spotify normal. */
+.app-screen{padding-top:26px}
+.track-list img{width:48px;height:48px}
+.track-list button{min-height:48px}
+.cards article{min-width:145px}.cards img{width:145px;height:145px}
+.recent{gap:14px}.recent img{width:48px;height:48px}.recent button{min-height:48px}.recent b{font-size:15px}.recent small{font-size:12px}
+
+.clear-recent{display:block;margin:26px auto 110px;padding:8px 16px;border:1px solid #777;border-radius:18px;background:transparent;color:#fff;font-family:inherit;font-size:12px;font-weight:700;min-height:32px}
+/* Ajuste pontual do fluxo da Busca conforme o print original. */
+.search-header{margin-top:-18px;margin-bottom:14px}
+.recent{gap:10px}
+.search-header .back{display:none}.search-header{padding-left:0}
+/* Escala estrutural baseada na comparação tela inteira com a referência original. */
+#home.app-screen{padding-top:16px}
+#home .app-header{display:contents}
+#home .app-header .search-pill,#home .app-header .more{display:none}
+#home .avatar{position:absolute;top:16px;left:16px;width:32px;height:32px;min-width:32px;font-size:18px}
+#home .chips{margin:0 0 18px;padding-left:40px;height:34px;gap:8px}
+#home .chips button{padding:8px 15px;font-size:12px}
+#home .eyebrow{font-size:11px;margin-bottom:4px}
+#home.app-screen h2{font-size:20px;margin-bottom:14px}
+#home .track-list{gap:8px;margin-bottom:24px}
+#home .track-list button{min-height:48px}
+#home .track-list b{font-size:14px}
+#home .track-list small{font-size:11px;margin-top:2px}
+#home .cards{gap:16px}
+#home .cards b{font-size:14px}
+#home .cards small{font-size:11px}
+#search.app-screen{padding-top:8px}
+#search .search-header{margin-top:0;margin-bottom:12px;height:29px}
+#search .search-header input{height:29px;border-radius:5px;font-size:12px;padding:0 12px}
+#search .search-header .text-btn{font-size:12px}
+#search.app-screen h2{font-size:18px;margin-bottom:14px}
+#search .recent{gap:10px}
+#search .recent b{font-size:14px}
+#search .recent small{font-size:11px;margin-top:2px}
+#search .recent i{font-size:0;display:flex;gap:13px;letter-spacing:0}
+#search .recent i::before{content:'⊕';font-size:21px;line-height:18px}
+#search .recent i::after{content:'×';font-size:21px;line-height:18px}
+.player{left:8px;right:8px;bottom:68px;height:56px;border-radius:6px;padding:6px 9px;gap:8px}
+.player .art-wave{width:42px;height:42px}
+.player span b{font-size:12px}.player span small{font-size:10px}
+.player button:first-of-type{width:24px;height:26px;background-size:20px 20px}.player button.pause{width:25px;height:27px;background-size:20px 20px}
+.bottom{height:68px}.bottom .bottom-icon{width:26px;height:26px}.bottom small{font-size:11px}
+#home .recently-played{margin-top:6px}
+#home .recently-played>h2{display:none}
+#home .more-like{margin:16px 0 12px}
+#home .more-like b{font-size:20px}
+#home .more-like small{font-size:11px}
+#home .track-list button{min-height:56px}
+#search .recent button{min-height:54px}
+#home .cards{margin-bottom:10px}
+#home .more-like img{width:48px;height:48px}

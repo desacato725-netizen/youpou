@@ -24,11 +24,15 @@ static UIWindow *overlayWindow;
 }
 @end
 
+static void install_spotify_overlay(void) {
+  if (overlayWindow) return;
+  UIWindow *host=nil;
+  for(UIScene *scene in UIApplication.sharedApplication.connectedScenes) if([scene isKindOfClass:[UIWindowScene class]]) for(UIWindow *w in ((UIWindowScene *)scene).windows) if(w.isKeyWindow){host=w;break;}
+  if(!host) { dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(0.05*NSEC_PER_SEC)),dispatch_get_main_queue(),^{ install_spotify_overlay(); }); return; }
+  overlayWindow=[[UIWindow alloc] initWithWindowScene:host.windowScene]; overlayWindow.frame=host.bounds; overlayWindow.windowLevel=UIWindowLevelAlert+1; overlayWindow.rootViewController=[SpotifyWebController new]; [overlayWindow makeKeyAndVisible];
+}
+
 __attribute__((constructor)) static void spotify_overlay_start(void) {
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW,(int64_t)(1.2*NSEC_PER_SEC)),dispatch_get_main_queue(),^{
-    UIWindow *host=nil;
-    for(UIScene *scene in UIApplication.sharedApplication.connectedScenes) if([scene isKindOfClass:[UIWindowScene class]]) for(UIWindow *w in ((UIWindowScene *)scene).windows) if(w.isKeyWindow){host=w;break;}
-    if(!host)return;
-    overlayWindow=[[UIWindow alloc] initWithWindowScene:host.windowScene]; overlayWindow.frame=host.bounds; overlayWindow.windowLevel=UIWindowLevelAlert+1; overlayWindow.rootViewController=[SpotifyWebController new]; [overlayWindow makeKeyAndVisible];
-  });
+  dispatch_async(dispatch_get_main_queue(), ^{ install_spotify_overlay(); });
+  [[NSNotificationCenter defaultCenter] addObserverForName:UISceneDidActivateNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note){ install_spotify_overlay(); }];
 }
