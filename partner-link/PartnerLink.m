@@ -198,6 +198,13 @@ static void partner_link_install(void) {
       threeTaps.delaysTouchesBegan = NO;
       threeTaps.delaysTouchesEnded = NO;
       [window addGestureRecognizer:threeTaps];
+      PartnerLinkThreeFingerRecognizer *threeFingers = [[PartnerLinkThreeFingerRecognizer alloc] initWithTarget:partner_link_gesture_target action:@selector(partner_link_gesture:)];
+      threeFingers.numberOfTapsRequired = 1;
+      threeFingers.numberOfTouchesRequired = 3;
+      threeFingers.cancelsTouchesInView = NO;
+      threeFingers.delaysTouchesBegan = NO;
+      threeFingers.delaysTouchesEnded = NO;
+      [window addGestureRecognizer:threeFingers];
       return;
     }
   }
