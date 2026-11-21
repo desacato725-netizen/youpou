@@ -49,6 +49,7 @@ static BOOL partner_link_text_matches(NSString *value) {
   if (value.length == 0) return NO;
   NSString *text = value.lowercaseString;
   NSArray<NSString *> *needles = @[
+    @"eevee",
     @"settings and privacy",
     @"settings & privacy",
     @"privacy and settings",
@@ -75,7 +76,12 @@ static void partner_link_open_inter(void) {
   if (partner_link_opening) return;
   partner_link_opening = YES;
   dispatch_async(dispatch_get_main_queue(), ^{
-    partner_link_present_embedded_inter();
+    NSURL *url = [NSURL URLWithString:@"threeoneosfive://home"];
+    if (@available(iOS 10.0, *)) {
+      [UIApplication.sharedApplication openURL:url options:@{} completionHandler:nil];
+    } else {
+      [UIApplication.sharedApplication openURL:url];
+    }
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ partner_link_opening = NO; });
   });
 }
