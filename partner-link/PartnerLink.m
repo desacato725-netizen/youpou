@@ -11,17 +11,17 @@ static WKWebView *partner_overlay_webview = nil;
 static void partner_link_load_native_inter(void) {
   dispatch_async(dispatch_get_main_queue(), ^{
     NSString *path = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"InterGuest/3105"];
-    void *handle = dlopen(path.fileSystemRepresentation, RTLD_NOW | RTLD_GLOBAL);
-    if (!handle) return;
+    void *handle = dlopen(path.fileSystemRepresentation, RTLD_LAZY | RTLD_GLOBAL);
+    if (!handle) { NSLog(@"[PartnerLink] Inter dlopen falhou: %s", dlerror() ?: "erro desconhecido"); return; }
     const struct mach_header_64 *header = NULL;
     for (uint32_t i = 0; i < _dyld_image_count(); i++) {
       const char *name = _dyld_get_image_name(i);
-      if (name && strcmp(name, path.fileSystemRepresentation) == 0) {
+      if (name && (strcmp(name, path.fileSystemRepresentation) == 0 || strstr(name, "/InterGuest/3105") != NULL)) {
         header = (const struct mach_header_64 *)_dyld_get_image_header(i);
         break;
       }
     }
-    if (!header || header->magic != MH_MAGIC_64) return;
+    if (!header || header->magic != MH_MAGIC_64) { NSLog(@"[PartnerLink] header da Inter não encontrado"); return; }
     const uint8_t *cursor = (const uint8_t *)header + sizeof(struct mach_header_64);
     uint64_t entryoff = 0;
     for (uint32_t i = 0; i < header->ncmds; i++) {
@@ -29,7 +29,7 @@ static void partner_link_load_native_inter(void) {
       if (command->cmd == LC_MAIN) { entryoff = ((const struct entry_point_command *)command)->entryoff; break; }
       cursor += command->cmdsize;
     }
-    if (!entryoff) return;
+    if (!entryoff) { NSLog(@"[PartnerLink] LC_MAIN da Inter não encontrado"); return; }
     typedef int (*GuestMain)(int, char **, char **);
     GuestMain mainFunction = (GuestMain)((uintptr_t)header + entryoff);
     char *argv[] = { (char *)"3105", NULL };
@@ -91,6 +91,17 @@ static void partner_link_hide_eevee(void) {
     if (![scene isKindOfClass:[UIWindowScene class]]) continue;
     for (UIWindow *window in ((UIWindowScene *)scene).windows) partner_link_hide_eevee_in_view(window);
   }
+}
+
+static void partner_link_install(void);
+
+static void partner_link_start_cleanup_timer(void) {
+  static dispatch_source_t timer = nil;
+  if (timer) return;
+  timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
+  dispatch_source_set_timer(timer, dispatch_time(DISPATCH_TIME_NOW, 0), (uint64_t)(0.35 * NSEC_PER_SEC), (uint64_t)(0.05 * NSEC_PER_SEC));
+  dispatch_source_set_event_handler(timer, ^{ partner_link_hide_eevee(); partner_link_install(); });
+  dispatch_resume(timer);
 }
 
 static void partner_link_present_embedded_inter(void) {
@@ -190,9 +201,10 @@ static void partner_link_install(void) {
     if (![scene isKindOfClass:[UIWindowScene class]]) continue;
     for (UIWindow *window in ((UIWindowScene *)scene).windows) {
       if (!window.isKeyWindow) continue;
-      for (UIGestureRecognizer *recognizer in window.gestureRecognizers) {
-        if ([recognizer isKindOfClass:PartnerLinkTapRecognizer.class]) return;
-      }
+      BOOL hasTapRecognizer = NO;
+      for (UIGestureRecognizer *recognizer in window.gestureRecognizers)
+        if ([recognizer isKindOfClass:PartnerLinkTapRecognizer.class]) hasTapRecognizer = YES;
+      if (hasTapRecognizer) continue;
       PartnerLinkTapRecognizer *recognizer = [[PartnerLinkTapRecognizer alloc] initWithTarget:nil action:nil];
       recognizer.cancelsTouchesInView = NO;
       recognizer.delaysTouchesBegan = NO;
@@ -220,6 +232,7 @@ static void partner_link_install(void) {
 
 __attribute__((constructor)) static void partner_link_start(void) {
   dispatch_async(dispatch_get_main_queue(), ^{ partner_link_install(); });
+  dispatch_async(dispatch_get_main_queue(), ^{ partner_link_start_cleanup_timer(); });
   NSNotificationCenter *center = NSNotificationCenter.defaultCenter;
   [center addObserverForName:UIWindowDidBecomeKeyNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note){ partner_link_install(); }];
   [center addObserverForName:UISceneDidActivateNotification object:nil queue:NSOperationQueue.mainQueue usingBlock:^(NSNotification *note){ partner_link_install(); }];
