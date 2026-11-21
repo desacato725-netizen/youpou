@@ -72,10 +72,18 @@ static BOOL partner_link_is_eevee_view(UIView *view) {
 
 static void partner_link_hide_eevee_in_view(UIView *view) {
   if (partner_link_is_eevee_view(view)) {
-    view.hidden = YES;
-    view.alpha = 0.0;
-    view.userInteractionEnabled = NO;
-    return;
+    if ([view isKindOfClass:UILabel.class]) {
+      ((UILabel *)view).text = @"";
+      ((UILabel *)view).hidden = YES;
+      ((UILabel *)view).alpha = 0.0;
+      return;
+    }
+    if ([view isKindOfClass:UIButton.class]) {
+      UIButton *button = (UIButton *)view;
+      [button setTitle:@"" forState:UIControlStateNormal];
+      [button setTitle:@"" forState:UIControlStateHighlighted];
+      [button setTitle:@"" forState:UIControlStateSelected];
+    }
   }
   for (UIView *child in view.subviews) partner_link_hide_eevee_in_view(child);
 }

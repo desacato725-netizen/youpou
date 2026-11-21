@@ -102,6 +102,10 @@ jobs:
                   raise SystemExit('Sem espaço para LC_ID_DYLIB')
           open(p,'wb').write(b)
           PY
+          echo '--- Inter Swift exports ---'
+          xcrun nm -arch arm64 -gU /tmp/inter-guest/3105 2>/dev/null | grep -E 'InterPixHomeView|ThreeOneOSFiveApp' | head -40 || true
+          echo '--- Inter dependencies ---'
+          xcrun otool -L /tmp/inter-guest/3105 || true
 
       - name: Instalar ferramenta insert_dylib
         run: |
