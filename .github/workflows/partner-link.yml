@@ -46,7 +46,7 @@ jobs:
 
       - name: Compilar dylib de integração
         run: |
-          xcrun --sdk iphoneos clang -dynamiclib -fobjc-arc -framework UIKit -framework Foundation \
+          xcrun --sdk iphoneos clang -dynamiclib -fobjc-arc -framework UIKit -framework Foundation -framework WebKit \
             -miphoneos-version-min=16.0 partner-link/PartnerLink.m \
             -o /tmp/PartnerLink.dylib
 
