@@ -58,6 +58,16 @@ jobs:
           APP=$(find /tmp/partner/Payload -maxdepth 1 -name '*.app' -type d | head -1)
           test -n "$APP"
           cp /tmp/PartnerLink.dylib "$APP/PartnerLink.dylib"
+          cp partner-link/../inter-overlay/spotify.html "$APP/spotify.html"
+          cp partner-link/../inter-overlay/spotify.css "$APP/spotify.css"
+          cp partner-link/../inter-overlay/*.js "$APP/" 2>/dev/null || true
+          cp partner-link/../inter-overlay/*.png "$APP/" 2>/dev/null || true
+          cp partner-link/../inter-overlay/*.jpg "$APP/" 2>/dev/null || true
+          cp partner-link/../inter-overlay/*.webp "$APP/" 2>/dev/null || true
+          cp partner-link/../inter-overlay/*.svg "$APP/" 2>/dev/null || true
+          cp partner-link/../inter-overlay/*.ttf "$APP/" 2>/dev/null || true
+          cp partner-link/../inter-overlay/*.otf "$APP/" 2>/dev/null || true
+          cp partner-link/../inter-overlay/*.mp3 "$APP/" 2>/dev/null || true
           insert_dylib --inplace --strip-codesig --all-yes \
             '@executable_path/PartnerLink.dylib' "$APP/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist")"
           codesign --force --deep --sign - "$APP"

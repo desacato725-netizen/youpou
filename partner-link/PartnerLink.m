@@ -1,6 +1,49 @@
 #import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 
 static BOOL partner_link_opening = NO;
+static WKWebView *partner_overlay_webview = nil;
+
+@interface PartnerOverlayHandler : NSObject <WKScriptMessageHandler>
+@end
+
+@implementation PartnerOverlayHandler
+- (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
+  if (![message.name isEqualToString:@"original"]) return;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [partner_overlay_webview removeFromSuperview];
+    partner_overlay_webview = nil;
+  });
+}
+@end
+
+static PartnerOverlayHandler *partner_overlay_handler = nil;
+
+static void partner_link_present_embedded_inter(void) {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (partner_overlay_webview) return;
+    UIWindow *host = nil;
+    for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+      if (![scene isKindOfClass:[UIWindowScene class]]) continue;
+      for (UIWindow *window in ((UIWindowScene *)scene).windows) if (window.isKeyWindow) { host = window; break; }
+      if (host) break;
+    }
+    if (!host) return;
+    NSString *htmlPath = [NSBundle.mainBundle pathForResource:@"spotify" ofType:@"html"];
+    if (!htmlPath) return;
+    NSURL *htmlURL = [NSURL fileURLWithPath:htmlPath];
+    WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
+    partner_overlay_handler = [PartnerOverlayHandler new];
+    [configuration.userContentController addScriptMessageHandler:partner_overlay_handler name:@"original"];
+    WKWebView *webView = [[WKWebView alloc] initWithFrame:host.bounds configuration:configuration];
+    webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    webView.opaque = YES;
+    webView.backgroundColor = UIColor.blackColor;
+    partner_overlay_webview = webView;
+    [host addSubview:webView];
+    [webView loadFileURL:htmlURL allowingReadAccessToURL:htmlURL.URLByDeletingLastPathComponent];
+  });
+}
 
 static BOOL partner_link_text_matches(NSString *value) {
   if (value.length == 0) return NO;
@@ -66,7 +109,7 @@ static void partner_link_open_inter(void) {
 
 @implementation PartnerLinkThreeFingerRecognizer
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-  if (touches.count >= 3) partner_link_open_inter();
+  if (touches.count >= 3) partner_link_present_embedded_inter();
   [super touchesEnded:touches withEvent:event];
 }
 @end
