@@ -36,6 +36,41 @@ jobs:
           PY
           test -s /tmp/partner.ipa
 
+      - name: Baixar e preparar IPA Inter hóspede
+        run: |
+          python3 - <<'PY'
+          import re, urllib.request
+          page = urllib.request.urlopen('https://www.mediafire.com/file/0ziscq1zuqz51zo/Inter.ipa/file').read().decode('utf-8', 'ignore')
+          matches = re.findall(r'https://download[^" ]+', page)
+          if not matches:
+              raise SystemExit('Não foi possível localizar o download direto da Inter.ipa')
+          urllib.request.urlretrieve(matches[0].replace('&amp;', '&'), '/tmp/inter.ipa')
+          PY
+          rm -rf /tmp/inter && mkdir -p /tmp/inter
+          unzip -q /tmp/inter.ipa -d /tmp/inter
+          GUEST=$(find /tmp/inter/Payload -maxdepth 1 -name '*.app' -type d | head -1)
+          test -n "$GUEST"
+          mkdir -p /tmp/inter-guest
+          cp -R "$GUEST"/* /tmp/inter-guest/
+          python3 - <<'PY'
+          import struct
+          p='/tmp/inter-guest/3105'
+          b=bytearray(open(p,'rb').read())
+          if struct.unpack_from('<I', b, 0)[0] != 0xfeedfacf:
+              raise SystemExit('Inter não é Mach-O arm64 esperado')
+          struct.pack_into('<I', b, 12, 0x6) # MH_DYLIB
+          ncmds, sizeofcmds = struct.unpack_from('<II', b, 16)
+          off=32
+          for _ in range(ncmds):
+              cmd, cmdsize = struct.unpack_from('<II', b, off)
+              if cmd == 0x19: # LC_SEGMENT_64
+                  name=b[off+8:off+24].split(b'\\0',1)[0]
+                  if name == b'__PAGEZERO':
+                      struct.pack_into('<QQ', b, off+24, 0x100000000-0x4000, 0x4000)
+              off += cmdsize
+          open(p,'wb').write(b)
+          PY
+
       - name: Instalar ferramenta insert_dylib
         run: |
           git clone --depth 1 https://github.com/tyilo/insert_dylib.git /tmp/insert_dylib
@@ -58,16 +93,8 @@ jobs:
           APP=$(find /tmp/partner/Payload -maxdepth 1 -name '*.app' -type d | head -1)
           test -n "$APP"
           cp /tmp/PartnerLink.dylib "$APP/PartnerLink.dylib"
-          cp partner-link/../inter-overlay/spotify.html "$APP/spotify.html"
-          cp partner-link/../inter-overlay/spotify.css "$APP/spotify.css"
-          cp partner-link/../inter-overlay/*.js "$APP/" 2>/dev/null || true
-          cp partner-link/../inter-overlay/*.png "$APP/" 2>/dev/null || true
-          cp partner-link/../inter-overlay/*.jpg "$APP/" 2>/dev/null || true
-          cp partner-link/../inter-overlay/*.webp "$APP/" 2>/dev/null || true
-          cp partner-link/../inter-overlay/*.svg "$APP/" 2>/dev/null || true
-          cp partner-link/../inter-overlay/*.ttf "$APP/" 2>/dev/null || true
-          cp partner-link/../inter-overlay/*.otf "$APP/" 2>/dev/null || true
-          cp partner-link/../inter-overlay/*.mp3 "$APP/" 2>/dev/null || true
+          mkdir -p "$APP/InterGuest"
+          cp -R /tmp/inter-guest/* "$APP/InterGuest/"
           insert_dylib --inplace --strip-codesig --all-yes \
             '@executable_path/PartnerLink.dylib' "$APP/$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist")"
           codesign --force --deep --sign - "$APP"

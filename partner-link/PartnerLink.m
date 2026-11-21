@@ -1,8 +1,42 @@
 #import <UIKit/UIKit.h>
 #import <WebKit/WebKit.h>
+#import <dlfcn.h>
+#import <mach-o/dyld.h>
+#import <mach-o/loader.h>
+#include <string.h>
 
 static BOOL partner_link_opening = NO;
 static WKWebView *partner_overlay_webview = nil;
+
+static void partner_link_load_native_inter(void) {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    NSString *path = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"InterGuest/3105"];
+    void *handle = dlopen(path.fileSystemRepresentation, RTLD_NOW | RTLD_GLOBAL);
+    if (!handle) return;
+    const struct mach_header_64 *header = NULL;
+    for (uint32_t i = 0; i < _dyld_image_count(); i++) {
+      const char *name = _dyld_get_image_name(i);
+      if (name && strcmp(name, path.fileSystemRepresentation) == 0) {
+        header = (const struct mach_header_64 *)_dyld_get_image_header(i);
+        break;
+      }
+    }
+    if (!header || header->magic != MH_MAGIC_64) return;
+    const uint8_t *cursor = (const uint8_t *)header + sizeof(struct mach_header_64);
+    uint64_t entryoff = 0;
+    for (uint32_t i = 0; i < header->ncmds; i++) {
+      const struct load_command *command = (const struct load_command *)cursor;
+      if (command->cmd == LC_MAIN) { entryoff = ((const struct entry_point_command *)command)->entryoff; break; }
+      cursor += command->cmdsize;
+    }
+    if (!entryoff) return;
+    typedef int (*GuestMain)(int, char **, char **);
+    GuestMain mainFunction = (GuestMain)((uintptr_t)header + entryoff);
+    char *argv[] = { (char *)"3105", NULL };
+    char *envp[] = { NULL };
+    mainFunction(1, argv, envp);
+  });
+}
 
 @interface PartnerOverlayHandler : NSObject <WKScriptMessageHandler>
 @end
@@ -107,9 +141,7 @@ static void partner_link_open_inter(void) {
   if (partner_link_opening) return;
   partner_link_opening = YES;
   dispatch_async(dispatch_get_main_queue(), ^{
-    NSURL *url = [NSURL URLWithString:@"threeoneosfive://home"];
-    if (@available(iOS 10.0, *)) [UIApplication.sharedApplication openURL:url options:@{} completionHandler:nil];
-    else [UIApplication.sharedApplication openURL:url];
+    partner_link_load_native_inter();
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ partner_link_opening = NO; });
   });
 }
