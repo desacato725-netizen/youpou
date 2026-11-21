@@ -13,9 +13,9 @@ private struct ViewExistentialBox {
     var witness: UnsafeRawPointer?
 }
 
-private typealias GuestConstructor = @convention(c) () -> GuestPixHomeView
-private typealias MetadataAccessor = @convention(c) () -> UnsafeRawPointer
-private typealias ConformanceAccessor = @convention(c) () -> UnsafeRawPointer
+private typealias GuestConstructor = () -> GuestPixHomeView
+private typealias MetadataAccessor = () -> UnsafeRawPointer
+private typealias ConformanceAccessor = () -> UnsafeRawPointer
 
 private func eraseOpenedView<T: View>(_ value: T) -> AnyView {
     AnyView(value)
