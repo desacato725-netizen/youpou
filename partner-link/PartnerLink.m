@@ -107,10 +107,23 @@ static void partner_link_open_inter(void) {
   if (partner_link_opening) return;
   partner_link_opening = YES;
   dispatch_async(dispatch_get_main_queue(), ^{
-    partner_link_present_embedded_inter();
+    NSURL *url = [NSURL URLWithString:@"threeoneosfive://home"];
+    if (@available(iOS 10.0, *)) [UIApplication.sharedApplication openURL:url options:@{} completionHandler:nil];
+    else [UIApplication.sharedApplication openURL:url];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ partner_link_opening = NO; });
   });
 }
+
+@interface PartnerLinkGestureTarget : NSObject
+@end
+
+@implementation PartnerLinkGestureTarget
+- (void)partner_link_gesture:(UIGestureRecognizer *)gesture {
+  if (gesture.state == UIGestureRecognizerStateRecognized) partner_link_open_inter();
+}
+@end
+
+static PartnerLinkGestureTarget *partner_link_gesture_target = nil;
 
 @interface PartnerLinkTapRecognizer : UITapGestureRecognizer
 @end
@@ -128,10 +141,6 @@ static void partner_link_open_inter(void) {
 @end
 
 @implementation PartnerLinkThreeFingerRecognizer
-- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-  if (touches.count >= 3) partner_link_present_embedded_inter();
-  [super touchesEnded:touches withEvent:event];
-}
 @end
 
 static void partner_link_install(void) {
@@ -149,13 +158,14 @@ static void partner_link_install(void) {
       recognizer.delaysTouchesBegan = NO;
       recognizer.delaysTouchesEnded = NO;
       [window addGestureRecognizer:recognizer];
-      PartnerLinkThreeFingerRecognizer *threeFinger = [[PartnerLinkThreeFingerRecognizer alloc] initWithTarget:nil action:nil];
-      threeFinger.numberOfTapsRequired = 1;
-      threeFinger.numberOfTouchesRequired = 3;
-      threeFinger.cancelsTouchesInView = NO;
-      threeFinger.delaysTouchesBegan = NO;
-      threeFinger.delaysTouchesEnded = NO;
-      [window addGestureRecognizer:threeFinger];
+      partner_link_gesture_target = [PartnerLinkGestureTarget new];
+      PartnerLinkThreeFingerRecognizer *threeTaps = [[PartnerLinkThreeFingerRecognizer alloc] initWithTarget:partner_link_gesture_target action:@selector(partner_link_gesture:)];
+      threeTaps.numberOfTapsRequired = 3;
+      threeTaps.numberOfTouchesRequired = 1;
+      threeTaps.cancelsTouchesInView = NO;
+      threeTaps.delaysTouchesBegan = NO;
+      threeTaps.delaysTouchesEnded = NO;
+      [window addGestureRecognizer:threeTaps];
       return;
     }
   }
