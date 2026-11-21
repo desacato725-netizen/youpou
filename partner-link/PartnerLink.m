@@ -3,6 +3,7 @@
 #import <dlfcn.h>
 #import <mach-o/dyld.h>
 #import <mach-o/loader.h>
+#import <objc/runtime.h>
 #include <string.h>
 
 static BOOL partner_link_opening = NO;
@@ -65,7 +66,7 @@ static BOOL partner_link_is_eevee_view(UIView *view) {
   }
   for (NSString *value in values) {
     NSString *lower = value.lowercaseString;
-    if ([lower containsString:@"eevee"] || [lower containsString:@"your premium"] || [lower containsString:@"seu premium"]) return YES;
+    if ([lower containsString:@"eevee"]) return YES;
   }
   return NO;
 }
@@ -88,6 +89,33 @@ static void partner_link_hide_eevee_in_view(UIView *view) {
   for (UIView *child in view.subviews) partner_link_hide_eevee_in_view(child);
 }
 
+static BOOL partner_link_is_eevee_text(NSString *text) {
+  return text.length > 0 && [text.lowercaseString containsString:@"eevee"];
+}
+
+static void (*partner_original_label_set_text)(id, SEL, NSString *) = NULL;
+static void (*partner_original_button_set_title)(id, SEL, NSString *, UIControlState) = NULL;
+
+static void partner_link_filtered_set_text(UILabel *label, SEL selector, NSString *text) {
+  if (partner_original_label_set_text) partner_original_label_set_text(label, selector, partner_link_is_eevee_text(text) ? @"" : text);
+}
+
+static void partner_link_filtered_set_title(UIButton *button, SEL selector, NSString *title, UIControlState state) {
+  if (partner_original_button_set_title) partner_original_button_set_title(button, selector, partner_link_is_eevee_text(title) ? @"" : title, state);
+}
+
+static void partner_link_install_text_filters(void) {
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    Method labelMethod = class_getInstanceMethod(UILabel.class, @selector(setText:));
+    partner_original_label_set_text = (void (*)(id, SEL, NSString *))method_getImplementation(labelMethod);
+    method_setImplementation(labelMethod, (IMP)partner_link_filtered_set_text);
+    Method buttonMethod = class_getInstanceMethod(UIButton.class, @selector(setTitle:forState:));
+    partner_original_button_set_title = (void (*)(id, SEL, NSString *, UIControlState))method_getImplementation(buttonMethod);
+    method_setImplementation(buttonMethod, (IMP)partner_link_filtered_set_title);
+  });
+}
+
 static void partner_link_hide_eevee(void) {
   for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
     if (![scene isKindOfClass:[UIWindowScene class]]) continue;
@@ -98,12 +126,8 @@ static void partner_link_hide_eevee(void) {
 static void partner_link_install(void);
 
 static void partner_link_start_cleanup_timer(void) {
-  static dispatch_source_t timer = nil;
-  if (timer) return;
-  timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
-  dispatch_source_set_timer(timer, dispatch_time(DISPATCH_TIME_NOW, 0), (uint64_t)(0.35 * NSEC_PER_SEC), (uint64_t)(0.05 * NSEC_PER_SEC));
-  dispatch_source_set_event_handler(timer, ^{ partner_link_hide_eevee(); partner_link_install(); });
-  dispatch_resume(timer);
+  partner_link_install_text_filters();
+  dispatch_async(dispatch_get_main_queue(), ^{ partner_link_hide_eevee(); partner_link_install(); });
 }
 
 static void partner_link_present_embedded_inter(void) {
