@@ -148,3 +148,12 @@ html,body{font-family:SiteFigtree,SpotifyCircular,-apple-system,BlinkMacSystemFo
 #search .recent button{min-height:54px}
 #home .cards{margin-bottom:10px}
 #home .more-like img{width:48px;height:48px}
+/* Ajuste sutil para o preto do Spotify normal. */
+html,body{background:#0d0d0d}
+.app-screen{background:#0f0f0f}
+.bottom{background:#090909}
+.player{background:#292929}
+.search-results{display:flex;flex-direction:column;gap:10px;margin:-2px 0 18px}
+.search-results button{display:flex;align-items:center;gap:13px;width:100%;min-height:54px;padding:0;border:0;background:none;color:#fff;text-align:left}
+.search-results img{width:48px;height:48px;object-fit:cover;border-radius:4px}
+.search-results span{flex:1}.search-results b,.search-results small{display:block}.search-results b{font-size:14px}.search-results small{font-size:11px;color:#aaa;margin-top:2px}.search-results i{font-style:normal;color:#aaa;white-space:nowrap}.no-results{color:#aaa;font-size:13px;margin:10px 0}
