@@ -61,10 +61,18 @@ static BOOL partner_link_is_eevee_view(UIView *view) {
     view.accessibilityHint ?: @""
   ];
   if ([view isKindOfClass:UIButton.class]) {
-    NSString *title = [(UIButton *)view titleForState:UIControlStateNormal];
-    if (title.length) values = [values arrayByAddingObject:title];
+    for (NSNumber *boxedState in @[@(UIControlStateNormal), @(UIControlStateHighlighted), @(UIControlStateSelected)]) {
+      NSString *title = [(UIButton *)view titleForState:boxedState.unsignedIntegerValue];
+      if (title.length) values = [values arrayByAddingObject:title];
+    }
   }
-  for (NSString *value in values) if ([value.lowercaseString containsString:@"eevee"]) return YES;
+  if ([view isKindOfClass:UILabel.class] && ((UILabel *)view).text.length) {
+    values = [values arrayByAddingObject:((UILabel *)view).text];
+  }
+  for (NSString *value in values) {
+    NSString *lower = value.lowercaseString;
+    if ([lower containsString:@"eevee"] || [lower containsString:@"your premium"] || [lower containsString:@"seu premium"]) return YES;
+  }
   return NO;
 }
 
