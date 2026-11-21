@@ -104,6 +104,16 @@ jobs:
           cp inter-overlay/reference-mix-2.jpg /tmp/inter-test/Payload/3105.app/reference-mix-2.jpg
           cp inter-overlay/reference-mix-3.jpg /tmp/inter-test/Payload/3105.app/reference-mix-3.jpg
           cp inter-overlay/reference-more-like.jpg /tmp/inter-test/Payload/3105.app/reference-more-like.jpg
+          cp inter-overlay/repo-circle-play.png /tmp/inter-test/Payload/3105.app/repo-circle-play.png
+          cp inter-overlay/repo-circle-stop.png /tmp/inter-test/Payload/3105.app/repo-circle-stop.png
+          cp inter-overlay/repo-devices.png /tmp/inter-test/Payload/3105.app/repo-devices.png
+          cp inter-overlay/repo-down-arrow.png /tmp/inter-test/Payload/3105.app/repo-down-arrow.png
+          cp inter-overlay/repo-next.png /tmp/inter-test/Payload/3105.app/repo-next.png
+          cp inter-overlay/repo-previous.png /tmp/inter-test/Payload/3105.app/repo-previous.png
+          cp inter-overlay/repo-shuffle.png /tmp/inter-test/Payload/3105.app/repo-shuffle.png
+          cp inter-overlay/repo-repeat.png /tmp/inter-test/Payload/3105.app/repo-repeat.png
+          cp inter-overlay/repo-playlist.png /tmp/inter-test/Payload/3105.app/repo-playlist.png
+          cp inter-overlay/repo-heart.png /tmp/inter-test/Payload/3105.app/repo-heart.png
 
       - name: Inserir dylib no executável arm64
         run: |
