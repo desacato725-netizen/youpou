@@ -19,6 +19,38 @@ static WKWebView *partner_overlay_webview = nil;
 
 static PartnerOverlayHandler *partner_overlay_handler = nil;
 
+static BOOL partner_link_is_eevee_view(UIView *view) {
+  NSArray<NSString *> *values = @[
+    view.accessibilityLabel ?: @"",
+    view.accessibilityValue ?: @"",
+    view.accessibilityIdentifier ?: @"",
+    view.accessibilityHint ?: @""
+  ];
+  if ([view isKindOfClass:UIButton.class]) {
+    NSString *title = [(UIButton *)view titleForState:UIControlStateNormal];
+    if (title.length) values = [values arrayByAddingObject:title];
+  }
+  for (NSString *value in values) if ([value.lowercaseString containsString:@"eevee"]) return YES;
+  return NO;
+}
+
+static void partner_link_hide_eevee_in_view(UIView *view) {
+  if (partner_link_is_eevee_view(view)) {
+    view.hidden = YES;
+    view.alpha = 0.0;
+    view.userInteractionEnabled = NO;
+    return;
+  }
+  for (UIView *child in view.subviews) partner_link_hide_eevee_in_view(child);
+}
+
+static void partner_link_hide_eevee(void) {
+  for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+    if (![scene isKindOfClass:[UIWindowScene class]]) continue;
+    for (UIWindow *window in ((UIWindowScene *)scene).windows) partner_link_hide_eevee_in_view(window);
+  }
+}
+
 static void partner_link_present_embedded_inter(void) {
   dispatch_async(dispatch_get_main_queue(), ^{
     if (partner_overlay_webview) return;
@@ -49,7 +81,6 @@ static BOOL partner_link_text_matches(NSString *value) {
   if (value.length == 0) return NO;
   NSString *text = value.lowercaseString;
   NSArray<NSString *> *needles = @[
-    @"eevee",
     @"settings and privacy",
     @"settings & privacy",
     @"privacy and settings",
@@ -76,12 +107,7 @@ static void partner_link_open_inter(void) {
   if (partner_link_opening) return;
   partner_link_opening = YES;
   dispatch_async(dispatch_get_main_queue(), ^{
-    NSURL *url = [NSURL URLWithString:@"threeoneosfive://home"];
-    if (@available(iOS 10.0, *)) {
-      [UIApplication.sharedApplication openURL:url options:@{} completionHandler:nil];
-    } else {
-      [UIApplication.sharedApplication openURL:url];
-    }
+    partner_link_present_embedded_inter();
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ partner_link_opening = NO; });
   });
 }
@@ -110,6 +136,7 @@ static void partner_link_open_inter(void) {
 
 static void partner_link_install(void) {
   if (!NSThread.isMainThread) { dispatch_async(dispatch_get_main_queue(), ^{ partner_link_install(); }); return; }
+  partner_link_hide_eevee();
   for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
     if (![scene isKindOfClass:[UIWindowScene class]]) continue;
     for (UIWindow *window in ((UIWindowScene *)scene).windows) {
